@@ -1,0 +1,2 @@
+Houve bastantes buscas no Stack Overflow visando entender melhor SQL e Regex. Mas os códigos são todos meus. Também foi procurada a documentação do python e do pandas algumas vezes.
+Outra fonte importante foi o próprio curso. Recorri a aulas passadas algumas vezes.
