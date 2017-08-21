@@ -16,7 +16,13 @@ Ruppercase_incorrect=re.compile(r'[A-Z][A-Z]+',re.U)#verifica as maiúsculas
 Rspace = re.compile(r'^([\w\. _])*[ ]',re.U)#olha espaços
 
 def update_problems_keys(name):
-    '''Função para corrigir os nomes nas colunas keys'''
+    '''Função para corrigir os nomes nas colunas keys
+    args:
+        name (str): nome a ser verificado por problemas
+    return:
+        (str) nome corrigido
+    
+    '''
     if(Rproblemchars.search(name)!=None):
         if(name==u'Unid.Hab'):
             return u'unidade_habitacional'
