@@ -1,0 +1,562 @@
+Análise dos Dados do banco Prosper por William Mesquita
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Carregue aqui todos os pacotes utilizados 
+# na sua análise realizada neste arquivo fonte.
+
+# Note que o parâmetro "echo" foi definido como FALSE neste código.
+# Isso previne que o código apresente resultados formatados em HTML.
+# Você deve definir echo=FALSE para todos os blocos de código no seu arquivo.
+
+
+library(ggplot2)
+library(GGally)
+library(gridExtra)
+library(stringr)
+library(scales)
+library(dplyr)
+library(corrr)
+```
+
+```{r echo=FALSE, Load_the_Data}
+# Carregamento dos dados
+setwd("~/Dropbox/data analyst/Projeto 4")
+pld <- read.csv("prosperLoanData.csv")
+```
+
+# Seção de Gráficos Univariados
+
+Os dados são do banco Prosper, falam a respeito de investimentos. São 113937 empréstimos com 81 variáveis sobre eles.
+```{r echo=FALSE, message=FALSE, warning=FALSE,Univariate_Plots0}
+str(pld)
+```
+
+Como são muitas variáveis, irei selecionar somente algumas para serem usadas e sumarizadas. A escolha das variáveis será procurando relações entre caracteristícas do credor e de seu emprestímo.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, define_subset}
+
+#Selecionarei variaveis que poderão vir a ser usadas para diminuir a complexidade do problema.
+UsefullVariables <- c("ProsperRating..numeric.","Occupation","TotalProsperLoans","IncomeVerifiable","IncomeRange","BorrowerState","BorrowerRate","MonthlyLoanPayment","EmploymentStatus","ListingCategory..numeric.","LoanStatus","StatedMonthlyIncome","BorrowerAPR","IsBorrowerHomeowner","CreditScoreRangeLower","OpenRevolvingAccounts","DebtToIncomeRatio","TradesNeverDelinquent..percentage.")
+pld_subset <- pld[,UsefullVariables]
+#Pequena limpeza prévia dos dados
+pld_subset$TotalProsperLoans[is.na(pld_subset$TotalProsperLoans)] <- 0
+pld_subset$ListingCategory..numeric. <- factor(pld$ListingCategory..numeric.)
+str(pld_subset)
+summary(pld_subset)
+```
+
+O ListingCategory já nos diz que das razões mais comuns de empréstimo (exeptuando consolidação de dívida e outros) melhorias na casa é a maior seguido de negócios. Temos várias outras informações nesses resumos. Mas analisarei os dados utilizando de gráficos.
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,univariate_Plots1}
+p1 <- ggplot(data=pld_subset,aes(x=BorrowerRate))+geom_histogram(bins = 20)
+p2 <- ggplot(data=pld_subset,aes(x=BorrowerAPR))+geom_histogram(bins = 20)
+grid.arrange(p1, p2, ncol=2)
+'Taxa APR'
+summary(pld_subset$BorrowerAPR)
+```
+
+ Em Ambos os casos temos uma distribuição normal. Mesmo modificando-se os bins temos um salto em 0.35. Pode ser pela existência de alguma cota padrão.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_Plots2}
+p1 <- ggplot(data=pld_subset,aes(x=StatedMonthlyIncome))+geom_histogram(binwidth = 500)+
+  xlim(0,quantile(pld_subset$StatedMonthlyIncome,probs=0.98))
+pld_subset.verificado <-pld_subset[(as.logical(pld_subset$IncomeVerifiable)),]
+p2 <- ggplot(data=pld_subset.verificado,aes(x=StatedMonthlyIncome))+geom_histogram(bins = 30) +
+  xlim(0,quantile(pld_subset$StatedMonthlyIncome,probs=0.98))+xlab("StatedMonthlyIncome (Verified)")
+grid.arrange(p1, p2, ncol=2)
+print("Verificado")
+summary(pld_subset.verificado$StatedMonthlyIncome)
+print("Normal")
+summary(pld_subset$StatedMonthlyIncome)
+```
+
+Foi criado um data frame aonde se tem somente empréstimos em que a renda da pessoa que recorreu ao empréstimo foi verificada. Como esperado os valores de renda têm menos ruído quando verificados. Temos o Terceiro quartil valendo 6825. e o Primeiro valendo 3333. Logo uma grande gama numa pequena região. Os gráficos apresentam uma grande cauda.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_PlotsExtra }
+#Preparando dados para ficarem na ordem correta
+level<-c("Not displayed", "Not employed","$0","$1-24,999", "$25,000-49,999", "$50,000-74,999", "$75,000-99,999","$100,000+")
+pld_subset$IncomeRange <-ordered(pld_subset$IncomeRange,levels=level)
+new_level<-c("Not displayed", "Not Employed","0","$1-24,99", "$25,00-49,99", "$50,00-74,99", "$75,00-99,99","$100,00+")
+levels(pld_subset$IncomeRange) <- new_level
+#Ajeitando as labels com o lapply
+ggplot(data=pld_subset,aes(x=IncomeRange))+geom_histogram(stat = "count")+
+    scale_x_discrete(labels = function(x) lapply(strwrap(x, width = 10, simplify = FALSE), paste, collapse="\n"))
+"Por ano"
+summary(pld_subset$IncomeRange)
+```
+
+Os grandes picos foram de 25 a 75 mil dolares por ano. o que dá 2.08 a 6.25 mil por mês o que bate com nosso achado do gráfico anterior.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_Plots3 }
+ggplot(data=pld_subset,aes(x=DebtToIncomeRatio))+geom_histogram(bins = 15)+
+  xlim(0,quantile(pld_subset$DebtToIncomeRatio,probs=0.99, na.rm = TRUE))
+summary(pld_subset$DebtToIncomeRatio)
+
+```
+
+Somente um pico. Interessante os valores serem em grande parte menores que 1 (foram retirados os 1% maiores)
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE, univariate_Plots4}
+ 
+p1 <- ggplot(data=pld_subset,aes(x=EmploymentStatus))+geom_histogram(stat = "count")+
+    scale_x_discrete(labels = function(x) lapply(strwrap(x, width = 10, simplify = FALSE), paste, collapse="\n"))
+pld_subset.pago <- pld_subset[pld_subset$LoanStatus=="Completed",]
+p2 <- ggplot(data=pld_subset.pago,aes(x=EmploymentStatus))+geom_histogram(stat = "count")+
+ xlab("EmplymentStatus (Loan Completed)")+ 
+  scale_x_discrete(labels = function(x) lapply(strwrap(x, width = 10, simplify = FALSE), paste, collapse="\n"))
+#  xlim(0,quantile(pld_subset$DebtToIncomeRatio,probs=0.99, na.rm = TRUE))
+grid.arrange(p1, p2, ncol=1)
+"Normal"
+summary(pld_subset$EmploymentStatus)
+"Já pago"
+summary(pld_subset.pago$EmploymentStatus)
+
+```
+
+Como esperado, pessoas com trabalho de tempo integral se sairam melhor em pagar as dívidas.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_Plots5 }
+p1 <- ggplot(data=pld_subset,aes(x=CreditScoreRangeLower))+geom_histogram(binwidth = 20)+
+  xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01, na.rm = TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99, na.rm = TRUE))
+p2 <- ggplot(data=pld_subset,aes(x=CreditScoreRangeLower))+geom_histogram(binwidth = 2)+
+  xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01, na.rm = TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99, na.rm = TRUE))
+grid.arrange(p1, p2, ncol=1)
+summary(pld_subset$CreditScoreRangeLower)
+```
+
+Outro gráfico que lembra uma normal. Porém tem uma grande queda a esquerda do pico. Nota-se também que os scores variam de 20 em 20.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_Plots6 }
+ggplot(data=pld_subset,aes(x=ProsperRating..numeric.))+geom_histogram(stat = "count")
+summary(pld_subset$ProsperRating..numeric.)
+```
+
+Uma distribuição bem normal. Com um único pico no 4. Há uma defasagem maior que esperada na categoria 7.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_Plots7 }
+p1 <- ggplot(data=pld_subset,aes(x=ListingCategory..numeric.))+geom_bar(aes(y = (..count..)/sum(..count..))) + scale_y_continuous(labels=percent)+ylab("count")
+p2 <- ggplot(data=pld_subset.pago,aes(x=ListingCategory..numeric.))+xlab("ListingCategory..numeric. (Pago)")+geom_bar(aes(y = (..count..)/sum(..count..))) + scale_y_continuous(labels=percent)+ylab("count")
+grid.arrange(p1, p2, ncol=1)
+"Normal"
+summary(pld_subset$ListingCategory..numeric.)
+"Já pago"
+summary(pld_subset.pago$ListingCategory..numeric.)
+
+```
+
+Temos que:
+0 - Mão disponível, 1 - Consolidação de débito, 2 - Reforma da casa, 3 - Negócios,4 - Empréstimo pessoal, 5 - Uso estudantil, 6 - Carro, 7- Outro, 8 - Bebê e adoção, 9 - Barco, 10 - Cirúrgia cosmética, 11 - Anel de noivado, 12 - Empréstimos verdes, 13 - Despesas de casa, 14 - Grandes Compras, 15 - Medico/Dental, 16 - Motocicleta, 17 - trailer, 18 - Taxas, 19 - Férias, 20 - Empréstimos de casamento.
+
+O gráfico inferior me diz qual a porcentagem de pessoas por categoria que efetivamente pagou e o superior é o sem restrição. Tivemos um resultado esperado. Quem consolida dívidas paga menos a dívida. Também é visivel pelos gráficos que a prosper é um banco que uma boa parte dos seus negócios é a consolidação de dívidas
+
+
+# Análise Univariada
+
+### Qual é a estrutura do conjunto de dados?
+
+São 113937 empréstimos e há 81 variáveis. Divididas em 3 categorias:
+
+* Controle do banco de dados:
+    - key, data de criação, etc. 
+* Sobre a pessoa que fez o empréstimo: 
+    - salário, emprego, se há casa própria, etc.
+* Sobre o emprestimo:
+    - Se houve lucro, o risco, status, etc.
+
+Outras observações:
+
+* Melhoria de casa e negócios são os motivos mais comuns para se pedir empréstimo.
+* A taxa de juros média é de 0.21883
+* O sálario médio dos devedores foi de $5656 por mês.
+* O ratio mais comum de débito renda é de 0.25, o que já compromete uma boa parte da renda.
+* o rating médio da prosper nos seus empréstimos é próximo de sua mediana valendo 4.075
+
+### Quais são os principais atributos de interesse deste conjunto de dados?
+
+São bastantes variáveis, estou colocando como principais a taxa de juros cobrada e o status do empréstimo(para analisar o que faz as pessoas pagarem).
+
+### Quais outros atributos você acha que podem lhe auxiliar na investigação destes atributos de interesse?
+
+Já separei as variáveis que tenho interesse em utilizar, são elas:
+```{r echo=FALSE, message=FALSE, warning=FALSE, show_variables}
+UsefullVariables
+```
+
+### Você criou novas variáveis a partir dos atributos existentes no conjunto de dados?
+
+Criei 2 novos datasets, um que só aceita entradas de empréstimos que já finalizaram sem grandes problemas e outro que só aceita entradas de empréstimos em que a renda do usuário foi verificada.
+
+### Dos atributos investigados, distribuições incomuns foram encontradas? Você aplicou operações nos dados para limpá-los, ajustá-los ou mudar a forma dos dados? Se sim, por quê?
+
+Sim. Teve distribuições com valores muito fora do escopo. Um exemplo é o débito pra renda que havia uma pessoa que devia 1000% de sua renda. Para limpar isso utilizei quando necessário a função quantile para retirar esses menos de 1% de dados sujos.
+
+# Seção de Gráficos Bivariados
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate0}
+#Selecionando só algumas variaveis para facilitar a visualização
+ggpairs(pld_subset[,12:length(names(pld_subset))], aes(alpha = 0.2))
+```
+
+Houve uma boa correlação entre creditScoreRangeLower e o BorrowerAPR, Ao contrário do que eu esperava. Ter muitas contas do tipo Revolving significa que a pessoa tem uma bom credit score. Provavelmente a pessoa precisaria já desse bom score alto para conseguir essas linhas de empréstimo. Porém ter muitas começa a diminuir o score.
+
+Também houve boa correlação entre pessoas com mau histórico e o Credit Score.
+
+Irei analisar agora essa relação entre a taxa de juros(BorrowerAPR) e o credit score. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate1}
+ggplot(pld_subset,aes(x=CreditScoreRangeLower,y=BorrowerAPR))+ geom_point(alpha=0.3)+xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+geom_smooth()
+"R^2:" 
+cor(pld_subset$CreditScoreRangeLower,pld_subset$BorrowerAPR, use = "complete.obs")^2
+```
+
+Curioso que mal há mudança na taxa de juros até o limiar de 650 de Credit Score. há um aumento aliás. Enquanto após 650 há uma queda contínua. Irei verificar agora a taxa de juros com outras variáveis.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate2}
+ggplot(pld_subset.verificado,aes(x=StatedMonthlyIncome,y=BorrowerAPR))+ geom_point(alpha=0.05)+xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth() + xlab("StatedMonthlyIncome (verificado)")
+```
+
+Só há queda da taxa de juros inicialmente. A partir de quando os salarios ficam maiores deixa de haver está variação. Esperava uma influência maior.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate3}
+ggplot(pld_subset, aes(x=BorrowerAPR, color=IsBorrowerHomeowner)) +
+  geom_histogram(fill="white", alpha=0.5, position="identity")
+
+ggplot(pld_subset.verificado,aes(x=IsBorrowerHomeowner, y=BorrowerAPR))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset.verificado$BorrowerAPR,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$BorrowerAPR,probs=0.99,na.rm=TRUE))
+
+pld_subset%>%group_by(IsBorrowerHomeowner)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE) ), mean_APR=BorrowerAPR )
+```
+
+
+Nota-se uma grande mudança nos valores da taxa de juros de a pessoa tem ou não casa. tivemos 0.02 de diferença na taxa de juros média.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate7extra}
+ggplot(pld_subset,aes(x=DebtToIncomeRatio,y=BorrowerAPR))+ geom_point(alpha=0.05)+xlim(quantile(pld_subset$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))+geom_smooth()
+```
+
+Quase 0.1 de mudança de taxa de juros. Pessoas que arriscam empréstimos alto demais para a sua a condição pagam ainda mais de juros
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate4}
+ggplot(pld_subset,aes(x=OpenRevolvingAccounts,y=BorrowerAPR))+ geom_point(alpha=0.05)+xlim(quantile(pld_subset$OpenRevolvingAccounts,probs=0.01,na.rm=TRUE),quantile(pld_subset$OpenRevolvingAccounts,probs=0.99,na.rm=TRUE))+geom_smooth()
+```
+
+
+Outro gráfico que se estabiliza e causa só uma diminuição leve no início. Ser um cliente com  contas abertas ajuda a diminuir a taxa de juros.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate6}
+
+#Variavel que verifica que se é mau ou bom pagador
+pld_subset$pago <- ifelse( pld_subset$LoanStatus=="Completed" | pld_subset$LoanStatus=="Current" | pld_subset$LoanStatus=="FinalPaymentInProgres" | pld_subset$LoanStatus=="Cancelled","Bom Pagador","Mau Pagador")
+pld_subset.verificado$pago <- ifelse( pld_subset.verificado$LoanStatus=="Completed" | pld_subset.verificado$LoanStatus=="Current" | pld_subset.verificado$LoanStatus=="FinalPaymentInProgres" | pld_subset.verificado$LoanStatus=="Cancelled","Bom Pagador","Mau Pagador")
+
+pld_subset.verificado$pago <- factor(pld_subset.verificado$pago)
+pld_subset$pago <- factor(pld_subset$pago)
+
+```
+
+Agora, depois de ter criado uma variável que diz se a pessoa não está com problemas no pagamento (usando a LoanStatus). Irei analisar os parametros anteriores contra essa novo variável. Vale reasaltar que para as dívidas em progresso sem percausos irei considerar como bom pagador.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate7}
+ggplot(pld_subset.verificado,aes(x=pago, y=StatedMonthlyIncome))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))
+
+pld_subset.verificado%>% group_by(pago)%>%summarise_each(funs(median = median, mean=mean ), mean=StatedMonthlyIncome )
+```
+
+A média varia quase 1000 dolares entre os maus pagadores e os bons. A variação ocorre justamente na área aonde há queda na taxa de juros. Provavelmente há um custo mínimo de vida perto dessa faixa que faz com que essa diferença seja mais pronunciada.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate8}
+ggplot(pld_subset.verificado,aes(x=pago, y=CreditScoreRangeLower))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))
+
+pld_subset.verificado%>% group_by(pago)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE) ), mean=CreditScoreRangeLower )
+```
+
+Até agora o Score tem exercido uma influência significativa e não deixa de demonstrar seu valor nesse boxplot com uma diferença pronunciada entre o mau e bom pagador. Especialmente entre 600 e 650 de score
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate9}
+ggplot(pld_subset.verificado,aes(x=pago, y=DebtToIncomeRatio))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset.verificado$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))
+
+pld_subset.verificado%>% group_by(pago)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE) ), mean=DebtToIncomeRatio )
+```
+
+As medianas foram bem iguais. Porém os bons pagadores foram mais concentrados.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate10}
+ggplot(pld_subset.verificado,aes(x=pago, y=BorrowerAPR))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset.verificado$BorrowerAPR,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$BorrowerAPR,probs=0.99,na.rm=TRUE))
+
+pld_subset.verificado%>% group_by(pago)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE) ), mean=BorrowerAPR )
+```
+
+Uma boa diferença na taxa de juros para pessoas que estão pagando em dia e os maus pagadores. Porém há uma dúvida entre quem é a causa e quem é o causador. Será que foi a taxa de juros que não permitiu a pessoa pagar direito. Ou foi a pessoa não ter um bom prospecto que aumentou a taxa?
+
+Irei analisar o Score
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate11}
+ggplot(pld_subset,aes(x=DebtToIncomeRatio,y=CreditScoreRangeLower))+ geom_point(alpha=0.05)+xlim(quantile(pld_subset$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))+ ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+geom_smooth()
+```
+
+Aparentemente o score não liga muito para essa variável.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate12}
+ggplot(pld_subset.verificado,aes(x=StatedMonthlyIncome,y=CreditScoreRangeLower))+ geom_point(alpha=0.05)+xlim(quantile(pld_subset$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+ ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+
+  geom_smooth()
+```
+
+Muito estranho esse comportamento. Ele primeiro diminui um pouco o score quando a pessoa tem mais renda. Sendo o score mínimo perto de 1700 dolares por mês de renda.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate13}
+pld_subset%>% group_by(pago,ListingCategory..numeric.) %>%
+  tally %>%
+  group_by(ListingCategory..numeric.) %>%
+    mutate(pct =round(100*n/sum(n),2)) %>% arrange(pago,desc(pct)) %>% 
+  ggplot(aes(x=ListingCategory..numeric., color = pago))+geom_point(aes(y = pct/100)) + scale_y_continuous(labels=percent)+ylab("porcentagem de bons ou maus pagadores na categoria")
+
+pld_subset%>% group_by(pago,ListingCategory..numeric.) %>%
+  tally %>%
+  group_by(ListingCategory..numeric.) %>%
+    mutate(pct =round(100*n/sum(n),2)) %>% arrange(pago,desc(pct)) %>% ungroup
+
+```
+
+O top 3 melhores pagadores foram pessoas que pegaram o empréstimo para comprar trailer. Seguido de motocicleta e barco. Todos veículos. Em quarto vem o anel de noivado. Seguido pelos empréstimos de casamento. 
+
+Já para os mau pagadores. O campo não definido "Não disponivel" é o pior. Mas retirando ele temos como top 3:
+Empréstimo pessoal, Uso Estudantil, Negócios. E emprestimos verdes e despesas da casa logo atrás. Note que são bens que não tem como haver devolução.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate15}
+ggplot(pld_subset.verificado,aes(x=TradesNeverDelinquent..percentage.,y=CreditScoreRangeLower))+ geom_point(alpha=0.05)+ ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+
+  geom_smooth()
+```
+
+Uma incrivel influência no ato de nunca ter tido problemas com empréstimos e o seu grade.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate14}
+ggplot(pld_subset.verificado,aes(x=TradesNeverDelinquent..percentage.,y=BorrowerAPR))+ geom_point(alpha=0.05)+ ylim(quantile(pld_subset$BorrowerAPR,probs=0.01,na.rm=TRUE),quantile(pld_subset$BorrowerAPR,probs=0.99,na.rm=TRUE))+
+  geom_smooth()
+```
+
+A taxa diminui bastante se a pessoa nunca falhou num empréstimo.
+
+# Análise Bivariada
+
+### Discuta sobre alguns dos relacionamentos observados nesta parte da investigação. Como os atributos de interesse variaram no conjunto de dados?
+
+Basicamente todos variaram conforme o esperado. Tirando exceções. O Score demonstrou ter uma influência muito maior do que previ na taxa de juros enquanto a relação débito renda não influenciou tanto assim. Maior parte dos casos a alteração foi de meio porcento a 1 porcento.
+
+Já nos gráficos que avaliava se a pessoa foi uma boa pagadora mostrou que ter um score abaixo de 650 é um grande indicativo disso(assim como acima de 650 é quando o juros começam a diminuir). Nas demais variáveis comportamentos esperados tirando o ratio débito-renda que não se pode afirmar muita coisa.
+só que ao sair de uma certa faixa aumenta-se a chance de a pessoa se tornar má pagadora.
+
+Notou-se também que carros e automóveis parecem empréstimos bons para se fazer. Pois costumam ser devolvido o dinheiro. Porém ainda é necessário fazer uma análise estatística maior para veríficar se não é só desvio estatístico.
+
+Por fim o histórico da pessoa influencia muito na taxa de juros obtida.
+
+### Você observou algum relacionamento interessante entre os outros atributos (os que não são de interesse)?
+
+O Credit Score foi bastante interessante. Diminuindo sem motivo aparente ao se aumentar a renda de um cidadão.
+
+O TradesNeverDelinquent Percentage se mostrou incrivelmente influente no Credit Score e na taxa de juros.
+
+
+### Qual foi o relacionamento mais forte encontrado?
+
+Entre a taxa de juros e o Score sem dúvida. Outros foram entre o Score e se a pessoa foi uma boa pagadora, mostrando que o Score é uma boa medida para analises do banco, e entre TradesNeverDelinquent Percentage e o Credit Score ou a taxa de juros.
+
+
+
+# Seção de Gráficos Multivariados
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE, Multivariate_Plots1}
+
+ggplot(pld_subset, aes(x=CreditScoreRangeLower,y=BorrowerAPR, color=pago, group= pago )) + geom_point(aes(shape=pago), alpha=0.05)+
+  xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ geom_smooth()
+
+```
+
+Resultado esperado. Para o mesmo CreditScore se o empréstimo for de menor valor há maior chance da pessoa pagar corretamente.
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots2}
+
+ggplot(pld_subset,aes(x=interaction(pago,IsBorrowerHomeowner), y=CreditScoreRangeLower))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))
+
+pld_subset%>% group_by(pago,IsBorrowerHomeowner)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE)), mean=CreditScoreRangeLower )
+```
+
+Esse gráfico demonstra a força de ser dono de casa própria. Casa própria gerou um aumento no Credit Score que fez com que os maus pagadores com casa própria tivessem um score maior que os bons pagadores sem casa. Lembrando que o score não sabe de antemão que a pessoa não irá pagar corretamente, porém ele serve para tentar descobrir isso.
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots3}
+
+ggplot(pld_subset, aes(x=CreditScoreRangeLower,y=DebtToIncomeRatio,color = IsBorrowerHomeowner,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.05)+
+  xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ 
+  ylim(quantile(pld_subset$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago))
+
+
+```
+maus pagadores se endividam mais do que o normal. O que pode ser um índicio ao se negociar um empréstimo. A curva gerada foi bem interessante.Apresentando um mínimo local bem no centro.(650 de score). Pessoas com casa própria conseguiram empréstimos maiores em relação a seu patrimônio quando tinham o mesmo creditScore
+
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots4}
+
+ggplot(pld_subset,aes(x=interaction(pago,IsBorrowerHomeowner), y=BorrowerRate))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset$BorrowerRate,probs=0.01,na.rm=TRUE),quantile(pld_subset$BorrowerRate,probs=0.99,na.rm=TRUE))
+
+pld_subset%>% group_by(pago,IsBorrowerHomeowner)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE)), mean=BorrowerRate )
+```
+
+O banco vem acertando na taxa de juros. Cobrando mais dos que acabam sendo mau pagadores. Apesar que a elevada taxa de juros pode dificultar ainda mais no pagamento da dívida.
+
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots5}
+
+ggplot(pld_subset, aes(x=DebtToIncomeRatio,y=CreditScoreRangeLower,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.05)+
+  ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ 
+  xlim(quantile(pld_subset$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
+```
+
+para emprestimos moderados o Credit Score supervaloriza um tanto a casa própria. mas isso se corrige para valores baixos e altos.
+
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots6}
+print("correlações com o credit score")
+pld_subset%>% select(TotalProsperLoans,DebtToIncomeRatio,OpenRevolvingAccounts,StatedMonthlyIncome,BorrowerAPR,CreditScoreRangeLower,BorrowerRate,)%>% correlate()%>% focus(CreditScoreRangeLower)
+
+```
+Aparentemente das variaveis referentes a pessoa que pega o empréstimo. débitos abertos é a variavel com maior peso. Seguido pela renda mensal Irei fazer uma análise parecida com a que fiz para o DebtToIncomeRatio com elas.
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots7}
+
+ggplot(pld_subset, aes(x=OpenRevolvingAccounts,y=CreditScoreRangeLower,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.02)+
+  ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ 
+  xlim(quantile(pld_subset$OpenRevolvingAccounts,probs=0.01,na.rm=TRUE),quantile(pld_subset$OpenRevolvingAccounts,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
+```
+
+Nota-se o mesmo comportamento em todos os casos. e novamente o Credit Score parece superestimar o valor da casa própria.
+
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots8}
+
+ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=CreditScoreRangeLower,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.01)+
+  ylim(quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
+```
+
+Especialmente para rendas altas. ele continua dando CreditScore similar para pessoas q foram maus pagadores e para pessoas que foram/estão sendo boas pagadoras mas não tem casa.
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots9}
+
+ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=BorrowerRate,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.01)+
+  ylim(quantile(pld_subset.verificado$BorrowerRate,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$BorrowerRate                                                                                   ,probs=0.99,na.rm=TRUE))+ 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
+```
+
+Formato esperado. Pessoas sem casa pegam uma taxa levemente maior.
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots10}
+
+ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=DebtToIncomeRatio,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.01)+
+  ylim(quantile(pld_subset.verificado$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))+ 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
+```
+
+Tivemos um formado esperado. Ao aumentar a renda mensal se diminui o ratio débito-renda. Ter casa impactou nesse ratio, provavelmente porque parte da renda da pessoa estaria comprometida com o aluguel quando ela não tem casa. Efetivamente diminuindo a renda mensal. Criarei a variavel empregado agora que terá o valor "Empregado" o valor "Desempregado" e o valor "Aposentado".
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots11}
+
+
+pld_subset$empregado <- ifelse( pld_subset$EmploymentStatus=="Employed" | pld_subset$EmploymentStatus=="Full-time" | pld_subset$EmploymentStatus=="Part-time" | pld_subset$EmploymentStatus=="Self-employed","Empregado", ifelse(pld_subset$EmploymentStatus=="Retired","Aposentado","Desempregado"))
+pld_subset.verificado$empregado <- ifelse( pld_subset.verificado$EmploymentStatus=="Employed" | pld_subset.verificado$EmploymentStatus=="Full-time" | pld_subset.verificado$EmploymentStatus=="Part-time" | pld_subset.verificado$EmploymentStatus=="Self-employed", "Empregado", ifelse(pld_subset.verificado$EmploymentStatus=="Retired","Aposentado","Desempregado"))
+
+pld_subset.verificado$empregado <- factor(pld_subset.verificado$empregado)
+pld_subset$empregado <- factor(pld_subset$empregado)
+
+```
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots12}
+
+ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=CreditScoreRangeLower,group=interaction(pago, empregado, IsBorrowerHomeowner ))) + geom_point( alpha=0.01)+
+  ylim(quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = interaction(IsBorrowerHomeowner, empregado)))+ labs(color= "Casa Própria, Empregado")
+```
+
+Ser aposentado tem um imenso fator. Provavelmete por ser uma renda fixa sólida. em seguida ter casa própria e por último ser empregado. Ser desempregado e não ter casa própria dá um credit score muito baixo. Ficando abaixo dos maus pagadores das outras categorias.
+
+```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots13}
+
+ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=BorrowerRate,group=interaction(pago, empregado, IsBorrowerHomeowner ),color = interaction(IsBorrowerHomeowner, empregado))) + geom_point( alpha=0.01)+
+  ylim(quantile(pld_subset.verificado$BorrowerRate,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$BorrowerRate,probs=0.99,na.rm=TRUE))+ 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = interaction(IsBorrowerHomeowner, empregado)))+ labs(color= "Casa Própria, Empregado")
+```
+
+Paga menos o aposentado sem casa própria a partir de uma certa quantia. Difícil entender o motivo para isso, uma possibilidade é que não entra hipotécas e só crédito consignado para o aposentado sem casa. O banco acertou em todos os casos. Cobrando mais de quem se tornou mal pagador.
+
+
+# Análise Multivariada
+
+### Discuta sobre os relacionamentos observados nesta parte da investigação. Quais atributos que fortaleceram os demais na observação das variáveis de interesse?
+
+Ser aposentado por si só apresenta uma grande força. Seguido por ter casa própria e por último ser empregado. Provavelmente pelas possibilidades de crédito que liberam.
+
+### Interações surpreendentes e/ou interessantes foram encontradas entre os atributos?
+
+Um exemplo de interação supreendente é o fato de que a taxa de juros ser menor para aposentados sem casa própria.
+
+Também é interessante notar que para um Credit Score de 630 em média. Não há diferença entre a taxa de juros de um bom pagador e de um mal. o que pode ser considerado um erro do banco que precisa ser melhor estudado.
+
+
+
+------
+
+# Gráficos Finais e Sumário
+
+### Primeiro Gráfico
+```{r echo=FALSE,  message=FALSE, warning=FALSE, Plot_One}
+pld_subset%>% group_by(pago,ListingCategory..numeric.) %>%
+  tally %>%
+  group_by(ListingCategory..numeric.) %>%
+    mutate(pct =round(100*n/sum(n),2)) %>% arrange(pago,desc(pct)) %>% 
+  ggplot(aes(x=ListingCategory..numeric., color = pago))+geom_point(aes(y = pct/100)) + scale_y_continuous(labels=percent)+ylab("porcentagem de bons ou maus pagadores na categoria")+xlab("Motivos para o empréstimo")
+```
+
+### Descrição do Primeiro Gráfico
+
+Temos que:
+0 - Mão disponível, 1 - Consolidação de débito, 2 - Reforma da casa, 3 - Negócios,4 - Empréstimo pessoal, 5 - Uso estudantil, 6 - Carro, 7- Outro, 8 - Bebê e adoção, 9 - Barco, 10 - Cirúrgia cosmética, 11 - Anel de noivado, 12 - Empréstimos verdes, 13 - Despesas de casa, 14 - Grandes Compras, 15 - Medico/Dental, 16 - Motocicleta, 17 - trailer, 18 - Taxas, 19 - Férias, 20 - Empréstimos de casamento.
+
+Esse gráfico é bem interessante. Mostra que o motivo por trás do empréstimo impacta muito no ato dele ser pago. Na sua análise foi constatado que bens materiais são objetivos de aluguel que há os melhores pagadores. Já empréstimos mais abstratos como Uso Estudantil, negócios e empréstimo pessoal fazem parte do top 3 dos piores. 
+
+### Segundo Gráfico
+```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Two}
+ggplot(pld_subset, aes(x=CreditScoreRangeLower,y=BorrowerAPR, color=pago, group= pago )) + geom_point(aes(shape=pago), alpha=0.05)+
+  xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ geom_smooth()+ ylab("Taxa de Juros Anual") + xlab("Credit Score")
+
+```
+
+
+### Descrição do Segundo Gráfico
+
+
+Um gráfico para evidenciar a importância do Credit Score nas decisões do banco. Sem dúvida a váriavel mais impactante nas decisões do banco. Perto de 620 a linha de bom pagador e mal pagador por algum motivo se tocam. Ou seja. Para esse Credit Score o banco cobra o mesmo dos que serão bons e maus pagadores. O que implica que estão errando.
+
+### Terceiro Gráfico
+```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Three}
+ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=BorrowerRate,group=interaction(empregado, IsBorrowerHomeowner ),color = interaction(IsBorrowerHomeowner, empregado))) + geom_point( alpha=0.01)+
+  ylim(quantile(pld_subset.verificado$BorrowerRate,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$BorrowerRate,probs=0.99,na.rm=TRUE))+ 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(color = interaction(IsBorrowerHomeowner, empregado)))+ labs(color= "Casa Própria, Empregado")+ ylab("Taxa de Juros") + xlab("Renda Mensal Verificada")
+```
+
+### Descrição do Terceiro Gráfico
+
+Esse é o mesmo gráfico do relatório porém retirei a diferenciação de bom e mau pagador para melhor visibilidade.
+Achei interessante o fato do aposentado sem casa própria pagar uma menor taxa para grandes rendas menais. Minha consideração é que ele pega empréstimos consignados que são melhores. Enquanto o outro aposentado também pega hipotécas.
+
+
+------
+
+# Reflexão
+
+A análise dos empréstimos se mostrou mais complexa do que eu pensava a princípio. Eram muitas variáveis e nenhuma delas mostrava um impacto fundamental nas variaveis de interesse(bom pagador e taxa de juros). Com exceção do Credit Score que já é um grade que o banco faz nas pessoas que pegam os empréstimos.
+
+Foi analisado que no ato de ser um bom pagador a motivação por trás da compra é muito relevante. Especialmente se a motivação for coisas sólidas como carro ou barco. Já para o Credit Score foi analisado a posse de casa própria e a o emprego. Ambos fatores contribuiram fortissamemente. Mas em especial aposentados tiveram uma ótima grade. O que provavelmente vem do fato deles terem uma fonte de renda muito sólida.
+
+O que seria o quarto gráfico mais interessante seria o que mostra a importância de ter um bom nome e nunca ter falhado ao pagar um empréstimo. O Credit Score é dominado por esse valor. Logo a lição é  pagar os empréstimos em dia.
+
+Em trabalhos futuros seria interessante tentar entender como o credit score funciona e utilizar a variavel bom pagador para tentar avaliar se ele está sendo útil realmente(algumas falhas foram encontradas no relatório) e assim melhora-lo.
