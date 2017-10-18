@@ -38,9 +38,17 @@ Como são muitas variáveis, irei selecionar somente algumas para serem usadas e
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, define_subset}
 
-#Selecionarei variaveis que poderão vir a ser usadas para diminuir a complexidade do problema.
-UsefullVariables <- c("ProsperRating..numeric.","Occupation","TotalProsperLoans","IncomeVerifiable","IncomeRange","BorrowerState","BorrowerRate","MonthlyLoanPayment","EmploymentStatus","ListingCategory..numeric.","LoanStatus","StatedMonthlyIncome","BorrowerAPR","IsBorrowerHomeowner","CreditScoreRangeLower","OpenRevolvingAccounts","DebtToIncomeRatio","TradesNeverDelinquent..percentage.")
-pld_subset <- pld[,UsefullVariables]
+#Selecionarei variaveis que poderão vir a ser usadas para diminuir a
+#complexidade do problema.
+UsefullVariables <- c("ProsperRating..numeric.", "Occupation",
+                      "TotalProsperLoans", "IncomeVerifiable", "IncomeRange",
+                      "BorrowerState", "BorrowerRate", "MonthlyLoanPayment",
+                      "EmploymentStatus", "ListingCategory..numeric.",
+                      "LoanStatus", "StatedMonthlyIncome", "BorrowerAPR",
+                      "IsBorrowerHomeowner", "CreditScoreRangeLower",
+                      "OpenRevolvingAccounts", "DebtToIncomeRatio",
+                      "TradesNeverDelinquent..percentage.")
+pld_subset <- pld[, UsefullVariables]
 #Pequena limpeza prévia dos dados
 pld_subset$TotalProsperLoans[is.na(pld_subset$TotalProsperLoans)] <- 0
 pld_subset$ListingCategory..numeric. <- factor(pld$ListingCategory..numeric.)
@@ -51,9 +59,10 @@ summary(pld_subset)
 O ListingCategory já nos diz que das razões mais comuns de empréstimo (exeptuando consolidação de dívida e outros) melhorias na casa é a maior seguido de negócios. Temos várias outras informações nesses resumos. Mas analisarei os dados utilizando de gráficos.
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,univariate_Plots1}
-p1 <- ggplot(data=pld_subset,aes(x=BorrowerRate))+geom_histogram(bins = 20)
-p2 <- ggplot(data=pld_subset,aes(x=BorrowerAPR))+geom_histogram(bins = 20)
-grid.arrange(p1, p2, ncol=2)
+p1 <- ggplot(data = pld_subset,aes(x = BorrowerRate)) +
+  geom_histogram(bins = 20)
+p2 <- ggplot(data = pld_subset,aes(x = BorrowerAPR)) + geom_histogram(bins = 20)
+grid.arrange(p1, p2, ncol = 2)
 'Taxa APR'
 summary(pld_subset$BorrowerAPR)
 ```
@@ -61,12 +70,16 @@ summary(pld_subset$BorrowerAPR)
  Em Ambos os casos temos uma distribuição normal. Mesmo modificando-se os bins temos um salto em 0.35. Pode ser pela existência de alguma cota padrão. O valor médio da taxa de juros foi de 0.2188 sendo que 50% delas ficaram entre 0.28 e 0.16(terceiro e primeiro quartil respectivamente)
  
 ```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_Plots2}
-p1 <- ggplot(data=pld_subset,aes(x=StatedMonthlyIncome))+geom_histogram(binwidth = 500)+
-  xlim(0,quantile(pld_subset$StatedMonthlyIncome,probs=0.98))
-pld_subset.verificado <-pld_subset[(as.logical(pld_subset$IncomeVerifiable)),]
-p2 <- ggplot(data=pld_subset.verificado,aes(x=StatedMonthlyIncome))+geom_histogram(bins = 30) +
-  xlim(0,quantile(pld_subset$StatedMonthlyIncome,probs=0.98))+xlab("StatedMonthlyIncome (Verified)")
-grid.arrange(p1, p2, ncol=2)
+p1 <- ggplot(data = pld_subset, 
+             aes(x = StatedMonthlyIncome)) + 
+  geom_histogram(binwidth = 500) +
+  xlim(0, quantile(pld_subset$StatedMonthlyIncome, probs = 0.98))
+pld_subset.verificado <- pld_subset[(as.logical(pld_subset$IncomeVerifiable)),]
+p2 <- ggplot(data = pld_subset.verificado,
+             aes(x = StatedMonthlyIncome)) + geom_histogram(bins = 30) +
+  xlim(0, quantile(pld_subset$StatedMonthlyIncome, probs = 0.98)) +
+  xlab("StatedMonthlyIncome (Verified)")
+grid.arrange(p1, p2, ncol = 2)
 print("Verificado")
 summary(pld_subset.verificado$StatedMonthlyIncome)
 print("Normal")
@@ -77,13 +90,18 @@ Foi criado um data frame aonde se tem somente empréstimos em que a renda da pes
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_PlotsExtra }
 #Preparando dados para ficarem na ordem correta
-level<-c("Not displayed", "Not employed","$0","$1-24,999", "$25,000-49,999", "$50,000-74,999", "$75,000-99,999","$100,000+")
-pld_subset$IncomeRange <-ordered(pld_subset$IncomeRange,levels=level)
-new_level<-c("Not displayed", "Not Employed","0","$1-24,99", "$25,00-49,99", "$50,00-74,99", "$75,00-99,99","$100,00+")
+level <- c("Not displayed", "Not employed", "$0", "$1-24,999",
+           "$25,000-49,999", "$50,000-74,999", "$75,000-99,999", "$100,000+")
+pld_subset$IncomeRange <- ordered(pld_subset$IncomeRange,levels = level)
+new_level <- c("Not displayed", "Not Employed", "0", "$1-24,99",
+               "$25,00-49,99", "$50,00-74,99", "$75,00-99,99", "$100,00+")
 levels(pld_subset$IncomeRange) <- new_level
 #Ajeitando as labels com o lapply
-ggplot(data=pld_subset,aes(x=IncomeRange))+geom_histogram(stat = "count")+
-    scale_x_discrete(labels = function(x) lapply(strwrap(x, width = 10, simplify = FALSE), paste, collapse="\n"))
+ggplot(data = pld_subset,aes(x = IncomeRange)) + 
+  geom_histogram(stat = "count") + 
+  scale_x_discrete(labels = function(x) lapply(strwrap(x, width = 10, 
+                                                       simplify = FALSE),
+                                               paste, collapse = "\n"))
 "Por ano"
 summary(pld_subset$IncomeRange)
 ```
@@ -91,8 +109,9 @@ summary(pld_subset$IncomeRange)
 Os grandes picos foram de 25 a 75 mil dolares por ano. o que dá 2.08 a 6.25 mil por mês o que bate com nosso achado do gráfico anterior.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_Plots3 }
-ggplot(data=pld_subset,aes(x=DebtToIncomeRatio))+geom_histogram(bins = 15)+
-  xlim(0,quantile(pld_subset$DebtToIncomeRatio,probs=0.99, na.rm = TRUE))
+ggplot(data = pld_subset,aes(x = DebtToIncomeRatio)) + 
+  geom_histogram(bins = 15) +
+  xlim(0, quantile(pld_subset$DebtToIncomeRatio, probs = 0.99, na.rm = TRUE))
 summary(pld_subset$DebtToIncomeRatio)
 
 ```
@@ -101,14 +120,20 @@ Somente um pico. Interessante os valores serem em grande parte menores que 1 com
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE, univariate_Plots4}
  
-p1 <- ggplot(data=pld_subset,aes(x=EmploymentStatus))+geom_histogram(stat = "count")+
-    scale_x_discrete(labels = function(x) lapply(strwrap(x, width = 10, simplify = FALSE), paste, collapse="\n"))
-pld_subset.pago <- pld_subset[pld_subset$LoanStatus=="Completed",]
-p2 <- ggplot(data=pld_subset.pago,aes(x=EmploymentStatus))+geom_histogram(stat = "count")+
- xlab("EmplymentStatus (Loan Completed)")+ 
-  scale_x_discrete(labels = function(x) lapply(strwrap(x, width = 10, simplify = FALSE), paste, collapse="\n"))
+p1 <- ggplot(data = pld_subset,aes(x = EmploymentStatus)) + 
+  geom_histogram(stat = "count") +
+    scale_x_discrete(labels = function(x) lapply(strwrap(x, width = 10,
+                                                         simplify = FALSE),
+                                                 paste, collapse = "\n"))
+pld_subset.pago <- pld_subset[pld_subset$LoanStatus == "Completed", ]
+p2 <- ggplot(data = pld_subset.pago,
+             aes(x = EmploymentStatus)) + geom_histogram(stat = "count") +
+  xlab("EmplymentStatus (Loan Completed)") + 
+  scale_x_discrete(labels = function(x) lapply(strwrap(x, width = 10, 
+                                                       simplify = FALSE),
+                                               paste, collapse = "\n"))
 #  xlim(0,quantile(pld_subset$DebtToIncomeRatio,probs=0.99, na.rm = TRUE))
-grid.arrange(p1, p2, ncol=1)
+grid.arrange(p1, p2, ncol = 1)
 "Normal"
 summary(pld_subset$EmploymentStatus)
 "Já pago"
@@ -119,27 +144,37 @@ summary(pld_subset.pago$EmploymentStatus)
 Como esperado, pessoas com trabalho de tempo integral se sairam melhor em pagar as dívidas. Para os empréstimos já completos e sem problemas tivemos somente 344 não empregados enquanto tivemos 835 no geral. Logo a maior parte dos desempregados falhou em pagar.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_Plots5 }
-p1 <- ggplot(data=pld_subset,aes(x=CreditScoreRangeLower))+geom_histogram(binwidth = 20)+
-  xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01, na.rm = TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99, na.rm = TRUE))
-p2 <- ggplot(data=pld_subset,aes(x=CreditScoreRangeLower))+geom_histogram(binwidth = 2)+
-  xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01, na.rm = TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99, na.rm = TRUE))
-grid.arrange(p1, p2, ncol=1)
+p1 <- ggplot(data = pld_subset,aes(x = CreditScoreRangeLower)) + 
+  geom_histogram(binwidth = 20) +
+  xlim(quantile(pld_subset$CreditScoreRangeLower,probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, probs = 0.99, na.rm = TRUE))
+p2 <- ggplot(data = pld_subset,aes(x = CreditScoreRangeLower)) +
+  geom_histogram(binwidth = 2) +
+  xlim(quantile(pld_subset$CreditScoreRangeLower,probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower,probs = 0.99, na.rm = TRUE))
+grid.arrange(p1, p2, ncol = 1)
 summary(pld_subset$CreditScoreRangeLower)
 ```
 
 Outro gráfico que lembra uma normal com média 685.6. Porém tem uma grande queda a esquerda do pico. Nota-se também que os scores variam de 20 em 20. Primeiro quartil foi 660 e o terceiro 720. Logo os valores foram concentrados.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_Plots6 }
-ggplot(data=pld_subset,aes(x=ProsperRating..numeric.))+geom_histogram(stat = "count")
+ggplot(data = pld_subset,aes(x = ProsperRating..numeric.)) +
+  geom_histogram(stat = "count")
 summary(pld_subset$ProsperRating..numeric.)
 ```
 
 Uma distribuição bem normal. Com um único pico no 4. Há uma defasagem maior que esperada na categoria 7. Primeiro quartil no 3 e terceiro no 5
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, univariate_Plots7 }
-p1 <- ggplot(data=pld_subset,aes(x=ListingCategory..numeric.))+geom_bar(aes(y = (..count..)/sum(..count..))) + scale_y_continuous(labels=percent)+ylab("count")
-p2 <- ggplot(data=pld_subset.pago,aes(x=ListingCategory..numeric.))+xlab("ListingCategory..numeric. (Pago)")+geom_bar(aes(y = (..count..)/sum(..count..))) + scale_y_continuous(labels=percent)+ylab("count")
-grid.arrange(p1, p2, ncol=1)
+p1 <- ggplot(data = pld_subset, aes(x=ListingCategory..numeric.)) + 
+  geom_bar(aes(y = (..count..) / sum(..count..))) +
+  scale_y_continuous(labels = percent)+ylab("count")
+p2 <- ggplot(data = pld_subset.pago, aes(x=ListingCategory..numeric.)) +
+  xlab("ListingCategory..numeric. (Pago)") +
+  geom_bar(aes(y = (..count..) / sum(..count..))) + 
+  scale_y_continuous(labels = percent)+ylab("count")
+grid.arrange(p1, p2, ncol = 1)
 "Normal"
 summary(pld_subset$ListingCategory..numeric.)
 "Já pago"
@@ -196,7 +231,7 @@ Sim. Teve distribuições com valores muito fora do escopo. Um exemplo é o déb
 # Seção de Gráficos Bivariados
 ```{r fig.width=18, fig.height=10, echo=FALSE, message=FALSE, warning=FALSE, bivariate0}
 #Selecionando só algumas variaveis para facilitar a visualização
-ggcorr(pld_subset[,12:length(names(pld_subset))],label=TRUE,label_size = 6)
+ggcorr(pld_subset[, 12:length(names(pld_subset))],label = TRUE, label_size = 6)
 ```
 
 Houve uma boa correlação entre creditScoreRangeLower e o BorrowerAPR, Ao contrário do que eu esperava. Ter muitas contas do tipo Revolving significa que a pessoa tem uma bom credit score. Provavelmente a pessoa precisaria já desse bom score alto para conseguir essas linhas de empréstimo. Porém ter muitas começa a diminuir o score.
@@ -206,48 +241,75 @@ Também houve boa correlação entre pessoas com mau histórico e o Credit Score
 Irei analisar agora essa relação entre a taxa de juros(BorrowerAPR) e o credit score. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate1}
-ggplot(pld_subset,aes(x=CreditScoreRangeLower,y=BorrowerAPR))+ geom_point(alpha=0.3)+xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+geom_smooth()
-"R:" 
-cor(pld_subset$CreditScoreRangeLower,pld_subset$BorrowerAPR, use = "complete.obs")
+ggplot(pld_subset, aes(x=CreditScoreRangeLower, y=BorrowerAPR)) +
+  geom_point(alpha = 0.3) +
+  xlim(quantile(pld_subset$CreditScoreRangeLower, probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, probs = 0.99,na.rm = TRUE)) +
+  geom_smooth()
+paste("R:", cor(pld_subset$CreditScoreRangeLower,pld_subset$BorrowerAPR, 
+                use = "complete.obs"))
 ```
 
 Curioso que mal há mudança na taxa de juros até o limiar de 650 de Credit Score. há um aumento aliás. Enquanto após 650 há uma queda contínua. Irei verificar agora a taxa de juros com outras variáveis. A correlação foi de -0.4297. Que para os padrões encontrados até aqui está ótima.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate2}
-ggplot(pld_subset.verificado,aes(x=StatedMonthlyIncome,y=BorrowerAPR))+ geom_point(alpha=0.05)+xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth() + xlab("StatedMonthlyIncome (verificado)")
+ggplot(pld_subset.verificado, aes(x = StatedMonthlyIncome, y = BorrowerAPR)) +
+  geom_point(alpha = 0.05) +
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                                           probs = 0.01, na.rm = TRUE), 
+                            quantile(pld_subset.verificado$StatedMonthlyIncome,
+                                           probs=0.99, na.rm=TRUE)) + 
+  geom_smooth() + xlab("StatedMonthlyIncome (verificado)")
 
-paste("R:", cor(pld_subset.verificado$StatedMonthlyIncome,pld_subset.verificado$BorrowerAPR, use = "complete.obs"))
+paste("R:", cor(pld_subset.verificado$StatedMonthlyIncome,
+                pld_subset.verificado$BorrowerAPR, use = "complete.obs"))
 ```
 
 Só há queda da taxa de juros inicialmente. A partir de quando os salários ficam maiores deixa de haver está variação. Esperava uma influência maior. A correlação foi de -0.131 somente
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate3}
-ggplot(pld_subset.verificado,aes(x=IsBorrowerHomeowner, y=BorrowerAPR))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset.verificado$BorrowerAPR,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$BorrowerAPR,probs=0.99,na.rm=TRUE))
+ggplot(pld_subset.verificado, aes(x = IsBorrowerHomeowner, y = BorrowerAPR)) + 
+  geom_boxplot(fill = "slateblue", alpha = 0.2) + 
+  ylim(quantile(pld_subset.verificado$BorrowerAPR, probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$BorrowerAPR, probs = 0.99, na.rm = TRUE))
 
-pld_subset%>%group_by(IsBorrowerHomeowner)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE) ), mean_APR=BorrowerAPR )
+pld_subset %>% 
+  group_by(IsBorrowerHomeowner) %>% 
+  summarise_each(funs(median = median(.,na.rm = TRUE), 
+                      mean = mean(., na.rm = TRUE) ), mean_APR = BorrowerAPR )
 "ICC Calculation: 0.03160444 "
 #ICCbare(data=pld_subset.verificado, x = IsBorrowerHomeowner, y = BorrowerAPR)
 
 ```
 
 
-Nota-se uma grande mudança nos valores da taxa de juros de a pessoa tem ou não casa. tivemos 0.02 de diferença na taxa de juros média. com um ICC de apenas 0.032
+Nota-se uma grande mudança nos valores da taxa de juros de a pessoa tem ou não casa. tivemos 0.02 de diferença na taxa de juros média. com um ICC de apenas 0.032. ICC é um índice que varia de 0 a 1. Com objetivos similares ao da correlação. Porém ele é mais adequado a quando se tem variáveis categóricas. Enquanto a correlação é para quando se tem ambas as variáveis numéricas.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate7extra}
-ggplot(pld_subset,aes(x=DebtToIncomeRatio,y=BorrowerAPR))+ geom_point(alpha=0.05)+xlim(quantile(pld_subset$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))+geom_smooth()
+ggplot(pld_subset, aes(x = DebtToIncomeRatio, y = BorrowerAPR)) +
+  geom_point(alpha = 0.05) + 
+  xlim(quantile(pld_subset$DebtToIncomeRatio, probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$DebtToIncomeRatio, probs = 0.99, na.rm = TRUE)) +
+  geom_smooth()
 
-"R:" 
-cor(pld_subset.verificado$DebtToIncomeRatio,pld_subset.verificado$BorrowerAPR, use = "complete.obs")
+paste("R: ", cor(pld_subset.verificado$DebtToIncomeRatio, 
+                pld_subset.verificado$BorrowerAPR, use = "complete.obs"))
 ```
 
 Quase 0.1 de mudança de taxa de juros. Pessoas que arriscam empréstimos alto demais para a sua a condição pagam ainda mais de juros. o R foi de  0.095
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate4}
-ggplot(pld_subset,aes(x=OpenRevolvingAccounts,y=BorrowerAPR))+ geom_point(alpha=0.05)+xlim(quantile(pld_subset$OpenRevolvingAccounts,probs=0.01,na.rm=TRUE),quantile(pld_subset$OpenRevolvingAccounts,probs=0.99,na.rm=TRUE))+geom_smooth()
+ggplot(pld_subset, aes(x = OpenRevolvingAccounts, y = BorrowerAPR)) +
+  geom_point(alpha = 0.05) +
+  xlim(quantile(pld_subset$OpenRevolvingAccounts, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$OpenRevolvingAccounts, 
+                probs = 0.99, na.rm = TRUE)) + 
+  geom_smooth()
 
-"R:" 
-cor(pld_subset$OpenRevolvingAccounts,pld_subset$BorrowerAPR, use = "complete.obs")
+paste("R: ", cor(pld_subset$OpenRevolvingAccounts, 
+                pld_subset$BorrowerAPR, use = "complete.obs"))
 ```
 
 
@@ -258,53 +320,94 @@ Foi obtida  --0.110 de correlação. Um valor razoavel.
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate6}
 
 #Variavel que verifica que se é mau ou bom pagador
-pld_subset$pago <- ifelse( pld_subset$LoanStatus=="Completed" | pld_subset$LoanStatus=="Current" | pld_subset$LoanStatus=="FinalPaymentInProgres" | pld_subset$LoanStatus=="Cancelled","Bom Pagador","Mau Pagador")
-pld_subset.verificado$pago <- ifelse( pld_subset.verificado$LoanStatus=="Completed" | pld_subset.verificado$LoanStatus=="Current" | pld_subset.verificado$LoanStatus=="FinalPaymentInProgres" | pld_subset.verificado$LoanStatus=="Cancelled","Bom Pagador","Mau Pagador")
+pld_subset$pago <- ifelse(pld_subset$LoanStatus == "Completed" |
+                            pld_subset$LoanStatus == "Current" |
+                            pld_subset$LoanStatus == "FinalPaymentInProgres" |
+                            pld_subset$LoanStatus == "Cancelled", 
+                          "Bom Pagador", "Mau Pagador")
+pld_subset.verificado$pago <- ifelse( 
+  pld_subset.verificado$LoanStatus == "Completed" | 
+    pld_subset.verificado$LoanStatus == "Current" | 
+    pld_subset.verificado$LoanStatus == "FinalPaymentInProgres" | 
+    pld_subset.verificado$LoanStatus == "Cancelled",
+  "Bom Pagador", "Mau Pagador")
 
 pld_subset.verificado$pago <- factor(pld_subset.verificado$pago)
 pld_subset$pago <- factor(pld_subset$pago)
 
 ```
 
-Agora, depois de ter criado uma variável que diz se a pessoa não está com problemas no pagamento (usando a LoanStatus). Irei analisar os parametros anteriores contra essa novo variável. Vale reasaltar que para as dívidas em progresso sem percausos irei considerar como bom pagador.
+Agora, depois de ter criado uma variável que diz se a pessoa não está com problemas no pagamento. Irei analisar os parametros anteriores contra essa novo variável. 
+
+Essa variável é derivada da variável LoanStatus. Basicamente se o empréstimo já foi finalizado bem(Completed). Se está terminando(FinalPaymentInProgres), se por algum motivo foi cancelado(Cancelled) ou se está correndo sem problemas(Current) Ele é considerado um bom pagador. Caso contrário é um mal pagador.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate7}
-ggplot(pld_subset.verificado,aes(x=pago, y=StatedMonthlyIncome))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))
+ggplot(pld_subset.verificado, aes(x = pago, y = StatedMonthlyIncome)) +
+  geom_boxplot(fill = "slateblue", alpha = 0.2) + 
+  ylim(quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs = 0.01, na.rm = TRUE),
+    quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))
 
-pld_subset.verificado%>% group_by(pago)%>%summarise_each(funs(median = median, mean=mean ), mean=StatedMonthlyIncome )
+pld_subset.verificado %>% 
+  group_by(pago) %>% 
+  summarise_each(funs(median = median, mean = mean), 
+                 mean = StatedMonthlyIncome)
 
-paste("ICC Calculation: ", ICCbare(data=pld_subset.verificado, x = pago, y = StatedMonthlyIncome))
+paste("ICC Calculation: ", ICCbare(data=pld_subset.verificado, x = pago, 
+                                   y = StatedMonthlyIncome))
 ```
 
 A média varia quase 1000 dolares entre os maus pagadores e os bons. A variação ocorre justamente na área aonde há queda na taxa de juros. Provavelmente há um custo mínimo de vida perto dessa faixa que faz com que essa diferença seja mais pronunciada. O ICC Foi de somente 0.0274
 
 
 ```{r results='hide', echo=FALSE, message=FALSE, warning=FALSE, bivariate8}
-ggplot(pld_subset.verificado,aes(x=pago, y=CreditScoreRangeLower))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))
-
-pld_subset.verificado%>% group_by(pago)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE) ), mean=CreditScoreRangeLower )
+ggplot(pld_subset.verificado,aes(x = pago, y = CreditScoreRangeLower)) +
+  geom_boxplot(fill = "slateblue", alpha = 0.2) +
+  ylim(quantile(pld_subset.verificado$CreditScoreRangeLower, 
+                                                  probs = 0.01, na.rm = TRUE),
+quantile(pld_subset.verificado$CreditScoreRangeLower,
+                                                  probs = 0.99, na.rm = TRUE))
+pld_subset.verificado %>% 
+  group_by(pago) %>% 
+  summarise_each(funs(median = median(., na.rm = TRUE), 
+                      mean = mean(.,na.rm = TRUE) ), 
+                 mean = CreditScoreRangeLower )
 "ICC Calculation: 0.234224086956191"
-#print(paste("ICC Calculation: ", ICCbare(data=pld_subset.verificado, x = pago, y = CreditScoreRangeLower)))
+#print(paste("ICC Calculation: ", ICCbare(data=pld_subset.verificado, 
+#x = pago, y = CreditScoreRangeLower)))
 ```
 
 Até agora o Score tem exercido uma influência significativa e não deixa de demonstrar seu valor nesse boxplot com uma diferença pronunciada entre o mau e bom pagador. Especialmente entre 600 e 650 de score. Foi obtido um ICC de 0.234. Mostrando grande correlação.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate9}
-ggplot(pld_subset.verificado,aes(x=pago, y=DebtToIncomeRatio))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset.verificado$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))
-
-pld_subset.verificado%>% group_by(pago)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE) ), mean=DebtToIncomeRatio )
+ggplot(pld_subset.verificado, aes(x = pago, y = DebtToIncomeRatio)) + 
+  geom_boxplot(fill = "slateblue", alpha = 0.2) +
+  ylim(quantile(pld_subset.verificado$DebtToIncomeRatio, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$DebtToIncomeRatio, 
+                probs = 0.99, na.rm = TRUE))
+pld_subset.verificado %>% 
+  group_by(pago) %>% 
+  summarise_each(funs(median = median(., na.rm = TRUE), 
+                      mean = mean(., na.rm = TRUE) ), mean = DebtToIncomeRatio)
 
 "ICC Calculation: 0.00550021605645665"
-#print(paste("ICC Calculation: ", ICCbare(data=pld_subset.verificado, x = pago, y = DebtToIncomeRatio)))
+#print(paste("ICC Calculation: ", ICCbare(data=pld_subset.verificado, 
+#x = pago, y = DebtToIncomeRatio)))
 ```
 
 As medianas foram bem iguais. Porém os bons pagadores ficaram mais concentrados. O ICC foi de apenas 0.006.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate10}
-ggplot(pld_subset.verificado,aes(x=pago, y=BorrowerAPR))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset.verificado$BorrowerAPR,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$BorrowerAPR,probs=0.99,na.rm=TRUE))
+ggplot(pld_subset.verificado, aes(x = pago, y = BorrowerAPR)) + 
+  geom_boxplot(fill = "slateblue", alpha = 0.2) +
+  ylim(quantile(pld_subset.verificado$BorrowerAPR, probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$BorrowerAPR, probs = 0.99, na.rm = TRUE))
 
-pld_subset.verificado%>% group_by(pago)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE) ), mean=BorrowerAPR )
-
+pld_subset.verificado %>% 
+  group_by(pago) %>% 
+  summarise_each(funs(median = median(., na.rm = TRUE), 
+                      mean = mean(., na.rm = TRUE)), mean = BorrowerAPR)
 "ICC Calculation: 0.1219502"
 #ICCbare(data=pld_subset.verificado, x = pago, y = BorrowerAPR)
 ```
@@ -314,33 +417,64 @@ Uma boa diferença na taxa de juros para pessoas que estão pagando em dia e os 
 Irei analisar o Score.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate11}
-ggplot(pld_subset,aes(x=DebtToIncomeRatio,y=CreditScoreRangeLower))+ geom_point(alpha=0.05)+xlim(quantile(pld_subset$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))+ ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+geom_smooth()
+ggplot(pld_subset,aes(x = DebtToIncomeRatio, y = CreditScoreRangeLower)) +
+  geom_point(alpha = 0.05) + 
+  xlim(quantile(pld_subset$DebtToIncomeRatio, 
+                probs = 0.01, na.rm = TRUE), 
+       quantile(pld_subset$DebtToIncomeRatio, 
+                probs = 0.99, na.rm = TRUE)) +
+  ylim(quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.99, na.rm = TRUE)) + 
+  geom_smooth()
 
-paste("R:", cor(pld_subset$DebtToIncomeRatio,pld_subset$CreditScoreRangeLower, use = "complete.obs"))
+paste("R:", cor(pld_subset$DebtToIncomeRatio,pld_subset$CreditScoreRangeLower,
+                use = "complete.obs"))
 ```
 
 Aparentemente o score não é muito influenciado por essa variável. Correlação foi de apenas -0.0131.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate12}
-ggplot(pld_subset.verificado,aes(x=StatedMonthlyIncome,y=CreditScoreRangeLower))+ geom_point(alpha=0.05)+xlim(quantile(pld_subset$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+ ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+
+ggplot(pld_subset.verificado, aes(x = StatedMonthlyIncome, 
+                                  y = CreditScoreRangeLower)) + 
+  geom_point(alpha = 0.05) + 
+  xlim(quantile(pld_subset$StatedMonthlyIncome, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$StatedMonthlyIncome, 
+                probs=0.99, na.rm=TRUE)) +
+  ylim(quantile(pld_subset$CreditScoreRangeLower,
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.99, na.rm = TRUE)) + 
   geom_smooth()
-paste("R:", cor(pld_subset.verificado$StatedMonthlyIncome,pld_subset.verificado$CreditScoreRangeLower, use = "complete.obs"))
+
+paste("R: ", cor(pld_subset.verificado$StatedMonthlyIncome,
+                 pld_subset.verificado$CreditScoreRangeLower, 
+                 use = "complete.obs"))
 ```
 
 Muito estranho esse comportamento. Ele primeiro diminui um pouco o score quando a pessoa tem mais renda. Sendo o score mínimo perto de 1700 dolares por mês de renda. A correlação foi de 0.164.
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate13}
-pld_subset%>% group_by(pago,ListingCategory..numeric.) %>%
+pld_subset%>% 
+  group_by(pago, ListingCategory..numeric.) %>%
   tally %>%
   group_by(ListingCategory..numeric.) %>%
-    mutate(pct =round(100*n/sum(n),2)) %>% arrange(pago,desc(pct)) %>% 
-  ggplot(aes(x=ListingCategory..numeric., color = pago))+geom_point(aes(y = pct/100)) + scale_y_continuous(labels=percent)+ylab("porcentagem de bons ou maus pagadores na categoria")
+  mutate(pct = round(100 * n / sum(n), 2)) %>% 
+  arrange(pago, desc(pct)) %>% 
+  ggplot(aes(x = ListingCategory..numeric., color = pago)) + 
+  geom_point(aes(y = pct / 100)) + 
+  scale_y_continuous(labels=percent) + 
+  ylab("porcentagem de bons ou maus pagadores na categoria")
 
-pld_subset%>% group_by(pago,ListingCategory..numeric.) %>%
+pld_subset %>% 
+  group_by(pago,ListingCategory..numeric.) %>%
   tally %>%
   group_by(ListingCategory..numeric.) %>%
-    mutate(pct =round(100*n/sum(n),2)) %>% arrange(pago,desc(pct)) %>% ungroup
+  mutate(pct = round(100 * n / sum(n), 2)) %>% 
+  arrange(pago,desc(pct)) %>% ungroup
 
 ```
 
@@ -350,19 +484,32 @@ Já para os mau pagadores. O campo não definido "Não disponivel" é o pior. Ma
 Empréstimo pessoal, Uso Estudantil, Negócios. E emprestimos verdes e despesas da casa logo atrás. Note que são bens que não tem como haver devolução.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate15}
-ggplot(pld_subset.verificado,aes(x=TradesNeverDelinquent..percentage.,y=CreditScoreRangeLower))+ geom_point(alpha=0.05)+ ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+
+ggplot(pld_subset.verificado,aes(x = TradesNeverDelinquent..percentage., 
+                                 y = CreditScoreRangeLower)) + 
+  geom_point(alpha = 0.05) + 
+  ylim(quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.99, na.rm = TRUE)) + 
   geom_smooth()
 
-paste("R:", cor(pld_subset.verificado$TradesNeverDelinquent..percentage.,pld_subset.verificado$CreditScoreRangeLower, use = "complete.obs"))
+paste("R:", cor(pld_subset.verificado$TradesNeverDelinquent..percentage.,
+                pld_subset.verificado$CreditScoreRangeLower, 
+                use = "complete.obs"))
 ```
 
 Uma incrivel influência no ato de nunca ter tido problemas com empréstimos e o seu grade. Tanto que a correlação foi de 0.476.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate14}
-ggplot(pld_subset.verificado,aes(x=TradesNeverDelinquent..percentage.,y=BorrowerAPR))+ geom_point(alpha=0.05)+ ylim(quantile(pld_subset$BorrowerAPR,probs=0.01,na.rm=TRUE),quantile(pld_subset$BorrowerAPR,probs=0.99,na.rm=TRUE))+
+ggplot(pld_subset.verificado,aes(x = TradesNeverDelinquent..percentage., 
+                                 y = BorrowerAPR)) +
+  geom_point(alpha=0.05) +
+  ylim(quantile(pld_subset$BorrowerAPR, probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$BorrowerAPR, probs = 0.99, na.rm = TRUE)) +
   geom_smooth()
 
-paste("R:", cor(pld_subset.verificado$TradesNeverDelinquent..percentage.,pld_subset.verificado$BorrowerAPR, use = "complete.obs"))
+paste("R:", cor(pld_subset.verificado$TradesNeverDelinquent..percentage., 
+                pld_subset.verificado$BorrowerAPR, use = "complete.obs"))
 ```
 
 A taxa diminui bastante se a pessoa nunca falhou num empréstimo. A correlação foi de -0.25. Bastante alta.
@@ -397,38 +544,63 @@ Entre a taxa de juros e o Score sem dúvida. Outros foram entre o Score e se a p
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE, Multivariate_Plots1}
 
-ggplot(pld_subset, aes(x=CreditScoreRangeLower,y=BorrowerAPR, color=pago, group= pago )) + geom_point(aes(shape=pago), alpha=0.05)+
-  xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ geom_smooth()
-
+ggplot(pld_subset, aes(x = CreditScoreRangeLower, y = BorrowerAPR, 
+                       color = pago, group = pago)) +
+  geom_point(aes(shape = pago), alpha = 0.05) +
+  xlim(quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.99, na.rm = TRUE)) + 
+  geom_smooth()
 ```
 
 Resultado esperado. Para o mesmo CreditScore se o empréstimo for de menor valor há maior chance da pessoa pagar corretamente.
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots2}
 
-ggplot(pld_subset,aes(x=interaction(pago,IsBorrowerHomeowner), y=CreditScoreRangeLower))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))
+ggplot(pld_subset, aes(x = interaction(pago, IsBorrowerHomeowner), 
+                       y = CreditScoreRangeLower)) + 
+  geom_boxplot(fill = "slateblue", alpha = 0.2) +
+  ylim(quantile(pld_subset$CreditScoreRangeLower, probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, probs = 0.99, na.rm = TRUE))
 
-pld_subset%>% group_by(pago,IsBorrowerHomeowner)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE)), mean=CreditScoreRangeLower )
+pld_subset %>% 
+  group_by(pago,IsBorrowerHomeowner) %>% 
+  summarise_each(funs(median = median(., na.rm = TRUE),
+                      mean=mean(., na.rm = TRUE)), mean=CreditScoreRangeLower)
 ```
 
 Esse gráfico demonstra a força de ser dono de casa própria. Casa própria gerou um aumento no Credit Score que fez com que os maus pagadores com casa própria tivessem um score maior que os bons pagadores sem casa. Lembrando que o score não sabe de antemão que a pessoa não irá pagar corretamente, porém ele serve para tentar descobrir isso.
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots3}
 
-ggplot(pld_subset, aes(x=CreditScoreRangeLower,y=DebtToIncomeRatio,color = IsBorrowerHomeowner,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.05)+
-  xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ 
-  ylim(quantile(pld_subset$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago))
-
-
+ggplot(pld_subset, aes(x = CreditScoreRangeLower, y = DebtToIncomeRatio, 
+                       color = IsBorrowerHomeowner, 
+                       group = interaction(IsBorrowerHomeowner, pago))) +
+  geom_point( alpha = 0.05) +
+  xlim(quantile(pld_subset$CreditScoreRangeLower,
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.99, na.rm = TRUE)) +
+  ylim(quantile(pld_subset$DebtToIncomeRatio, probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$DebtToIncomeRatio,probs=0.99,na.rm=TRUE)) + 
+  geom_smooth(aes(linetype = pago))
 ```
-maus pagadores se endividam mais do que o normal. O que pode ser um índicio ao se negociar um empréstimo. A curva gerada foi bem interessante.Apresentando um mínimo local bem no centro.(650 de score). Pessoas com casa própria conseguiram empréstimos maiores em relação a seu patrimônio quando tinham o mesmo creditScore
+
+Maus pagadores se endividam mais do que o normal. O que pode ser um índicio ao se negociar um empréstimo. A curva gerada foi bem interessante.Apresentando um mínimo local bem no centro.(650 de score). Pessoas com casa própria conseguiram empréstimos maiores em relação a seu patrimônio quando tinham o mesmo creditScore
 
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots4}
 
-ggplot(pld_subset,aes(x=interaction(pago,IsBorrowerHomeowner), y=BorrowerRate))+   geom_boxplot(fill="slateblue", alpha=0.2) +ylim(quantile(pld_subset$BorrowerRate,probs=0.01,na.rm=TRUE),quantile(pld_subset$BorrowerRate,probs=0.99,na.rm=TRUE))
-
-pld_subset%>% group_by(pago,IsBorrowerHomeowner)%>%summarise_each(funs(median = median(.,na.rm=TRUE), mean=mean(.,na.rm=TRUE)), mean=BorrowerRate )
+ggplot(pld_subset,aes(x = interaction(pago,IsBorrowerHomeowner), 
+                      y = BorrowerRate)) + 
+  geom_boxplot(fill = "slateblue", alpha = 0.2) +
+  ylim(quantile(pld_subset$BorrowerRate, probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$BorrowerRate, probs=0.99, na.rm = TRUE))
+pld_subset %>% 
+  group_by(pago,IsBorrowerHomeowner)%>% 
+  summarise_each(funs(median = median(., na.rm = TRUE),
+                      mean = mean(., na.rm = TRUE)), mean = BorrowerRate )
 ```
 
 O banco vem acertando na taxa de juros. Cobrando mais dos que acabam sendo mau pagadores. Apesar que a elevada taxa de juros pode dificultar ainda mais no pagamento da dívida.
@@ -436,9 +608,15 @@ O banco vem acertando na taxa de juros. Cobrando mais dos que acabam sendo mau p
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots5}
 
-ggplot(pld_subset, aes(x=DebtToIncomeRatio,y=CreditScoreRangeLower,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.05)+
-  ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ 
-  xlim(quantile(pld_subset$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
+ggplot(pld_subset, aes(x = DebtToIncomeRatio, y = CreditScoreRangeLower, 
+                       group = interaction(IsBorrowerHomeowner, pago))) +
+  geom_point(alpha = 0.05) +
+  ylim(quantile(pld_subset$CreditScoreRangeLower,
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, probs=0.99, na.rm = TRUE)) +
+  xlim(quantile(pld_subset$DebtToIncomeRatio, probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$DebtToIncomeRatio, probs = 0.99, na.rm = TRUE)) + 
+  geom_smooth(aes(linetype = pago, color = IsBorrowerHomeowner))
 ```
 
 para emprestimos moderados o Credit Score supervaloriza um tanto a casa própria. mas isso se corrige para valores baixos e altos.
@@ -446,16 +624,29 @@ para emprestimos moderados o Credit Score supervaloriza um tanto a casa própria
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots6}
 print("correlações com o credit score")
-pld_subset%>% select(TotalProsperLoans,DebtToIncomeRatio,OpenRevolvingAccounts,StatedMonthlyIncome,BorrowerAPR,CreditScoreRangeLower,BorrowerRate,)%>% correlate()%>% focus(CreditScoreRangeLower)
-
+pld_subset %>% 
+  select(TotalProsperLoans, DebtToIncomeRatio, OpenRevolvingAccounts,
+         StatedMonthlyIncome, BorrowerAPR, 
+         CreditScoreRangeLower,  BorrowerRate) %>% 
+  correlate() %>% 
+  focus(CreditScoreRangeLower)
 ```
 Aparentemente das variaveis referentes a pessoa que pega o empréstimo. débitos abertos é a variavel com maior peso. Seguido pela renda mensal Irei fazer uma análise parecida com a que fiz para o DebtToIncomeRatio com elas.
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots7}
 
-ggplot(pld_subset, aes(x=OpenRevolvingAccounts,y=CreditScoreRangeLower,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.02)+
-  ylim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ 
-  xlim(quantile(pld_subset$OpenRevolvingAccounts,probs=0.01,na.rm=TRUE),quantile(pld_subset$OpenRevolvingAccounts,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
+ggplot(pld_subset, aes(x = OpenRevolvingAccounts, y = CreditScoreRangeLower,
+                       group = interaction(IsBorrowerHomeowner, pago))) +
+  geom_point( alpha = 0.02) +
+  ylim(quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.99, na.rm = TRUE)) + 
+  xlim(quantile(pld_subset$OpenRevolvingAccounts, 
+                probs = 0.01, na.rm = TRUE), 
+       quantile(pld_subset$OpenRevolvingAccounts, 
+                probs = 0.99, na.rm = TRUE)) + 
+  geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
 ```
 
 Nota-se o mesmo comportamento em todos os casos. e novamente o Credit Score parece superestimar o valor da casa própria.
@@ -463,27 +654,58 @@ Nota-se o mesmo comportamento em todos os casos. e novamente o Credit Score pare
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots8}
 
-ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=CreditScoreRangeLower,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.01)+
-  ylim(quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ 
-  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
+ggplot(pld_subset.verificado, aes(x = StatedMonthlyIncome,
+                                  y = CreditScoreRangeLower,
+                                  group = interaction(IsBorrowerHomeowner,
+                                                    pago))) + 
+  geom_point( alpha = 0.01) +
+  ylim(quantile(pld_subset.verificado$CreditScoreRangeLower, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$CreditScoreRangeLower, 
+                probs = 0.99, na.rm = TRUE)) + 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs=0.99, na.rm=TRUE)) +
+  geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
 ```
 
 Especialmente para rendas altas. ele continua dando CreditScore similar para pessoas q foram maus pagadores e para pessoas que foram/estão sendo boas pagadoras mas não tem casa.
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots9}
 
-ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=BorrowerRate,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.01)+
-  ylim(quantile(pld_subset.verificado$BorrowerRate,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$BorrowerRate                                                                                   ,probs=0.99,na.rm=TRUE))+ 
-  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
+ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome, y = BorrowerRate,
+                                  group = interaction(IsBorrowerHomeowner,
+                                                    pago))) + 
+  geom_point( alpha = 0.01) +
+  ylim(quantile(pld_subset.verificado$BorrowerRate, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$BorrowerRate, probs=0.99, na.rm=TRUE)) + 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs = 0.01, na.rm = TRUE), 
+       quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs = 0.99, na.rm = TRUE)) + 
+  geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
 ```
 
 Formato esperado. Pessoas sem casa pegam uma taxa levemente maior.
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots10}
 
-ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=DebtToIncomeRatio,group=interaction(IsBorrowerHomeowner, pago))) + geom_point( alpha=0.01)+
-  ylim(quantile(pld_subset.verificado$DebtToIncomeRatio,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$DebtToIncomeRatio,probs=0.99,na.rm=TRUE))+ 
-  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
+ggplot(pld_subset.verificado, aes(x = StatedMonthlyIncome, 
+                                  y = DebtToIncomeRatio, 
+                                  group = interaction(IsBorrowerHomeowner,
+                                                      pago))) + 
+  geom_point( alpha = 0.01) +
+  ylim(quantile(pld_subset.verificado$DebtToIncomeRatio,
+                probs = 0.01, na.rm = TRUE), 
+       quantile(pld_subset.verificado$DebtToIncomeRatio, 
+                probs = 0.99, na.rm = TRUE))+ 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs=0.99,na.rm=TRUE)) + 
+  geom_smooth(aes(linetype = pago,color = IsBorrowerHomeowner))
 ```
 
 Tivemos um formado esperado. Ao aumentar a renda mensal se diminui o ratio débito-renda. Ter casa impactou nesse ratio, provavelmente porque parte da renda da pessoa estaria comprometida com o aluguel quando ela não tem casa. Efetivamente diminuindo a renda mensal. Criarei a variavel empregado agora que terá o valor "Empregado" o valor "Desempregado" e o valor "Aposentado".
@@ -491,8 +713,19 @@ Tivemos um formado esperado. Ao aumentar a renda mensal se diminui o ratio débi
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots11}
 
 
-pld_subset$empregado <- ifelse( pld_subset$EmploymentStatus=="Employed" | pld_subset$EmploymentStatus=="Full-time" | pld_subset$EmploymentStatus=="Part-time" | pld_subset$EmploymentStatus=="Self-employed","Empregado", ifelse(pld_subset$EmploymentStatus=="Retired","Aposentado","Desempregado"))
-pld_subset.verificado$empregado <- ifelse( pld_subset.verificado$EmploymentStatus=="Employed" | pld_subset.verificado$EmploymentStatus=="Full-time" | pld_subset.verificado$EmploymentStatus=="Part-time" | pld_subset.verificado$EmploymentStatus=="Self-employed", "Empregado", ifelse(pld_subset.verificado$EmploymentStatus=="Retired","Aposentado","Desempregado"))
+pld_subset$empregado <- ifelse( 
+  pld_subset$EmploymentStatus == "Employed" | 
+    pld_subset$EmploymentStatus == "Full-time" |
+    pld_subset$EmploymentStatus == "Part-time" |
+    pld_subset$EmploymentStatus == "Self-employed", "Empregado", 
+  ifelse(pld_subset$EmploymentStatus == "Retired","Aposentado","Desempregado"))
+pld_subset.verificado$empregado <- ifelse(
+  pld_subset.verificado$EmploymentStatus == "Employed" |
+    pld_subset.verificado$EmploymentStatus == "Full-time" |   
+    pld_subset.verificado$EmploymentStatus == "Part-time" |
+    pld_subset.verificado$EmploymentStatus == "Self-employed", "Empregado",
+  ifelse(pld_subset.verificado$EmploymentStatus == "Retired", "Aposentado",
+         "Desempregado"))
 
 pld_subset.verificado$empregado <- factor(pld_subset.verificado$empregado)
 pld_subset$empregado <- factor(pld_subset$empregado)
@@ -501,18 +734,44 @@ pld_subset$empregado <- factor(pld_subset$empregado)
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots12}
 
-ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=CreditScoreRangeLower,group=interaction(pago, empregado, IsBorrowerHomeowner ))) + geom_point( alpha=0.01)+
-  ylim(quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ 
-  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = interaction(IsBorrowerHomeowner, empregado)))+ labs(color= "Casa Própria, Empregado")
+ggplot(pld_subset.verificado, aes(x = StatedMonthlyIncome,
+                                  y=CreditScoreRangeLower, 
+                                  group = interaction(pago, empregado,
+                                                      IsBorrowerHomeowner))) +
+  geom_point(alpha = 0.01) +
+  ylim(quantile(pld_subset.verificado$CreditScoreRangeLower, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$CreditScoreRangeLower, 
+                probs=0.99, na.rm = TRUE)) + 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs = 0.99, na.rm = TRUE)) + 
+  geom_smooth(aes(linetype = pago, 
+                  color = interaction(IsBorrowerHomeowner, empregado))) +
+  labs(color = "Casa Própria, Empregado")
 ```
 
 Ser aposentado tem um imenso fator. Provavelmete por ser uma renda fixa sólida. em seguida ter casa própria e por último ser empregado. Ser desempregado e não ter casa própria dá um credit score muito baixo. Ficando abaixo dos maus pagadores das outras categorias.
 
 ```{r echo=FALSE,  message=FALSE, warning=FALSE,  Multivariate_Plots13}
 
-ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y=BorrowerRate,group=interaction(pago, empregado, IsBorrowerHomeowner ),color = interaction(IsBorrowerHomeowner, empregado))) + geom_point( alpha=0.01)+
-  ylim(quantile(pld_subset.verificado$BorrowerRate,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$BorrowerRate,probs=0.99,na.rm=TRUE))+ 
-  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(linetype = pago,color = interaction(IsBorrowerHomeowner, empregado)))+ labs(color= "Casa Própria, Empregado")
+ggplot(pld_subset.verificado, 
+       aes(x = StatedMonthlyIncome, y = BorrowerRate, 
+           group = interaction(pago, empregado, IsBorrowerHomeowner ), 
+           color = interaction(IsBorrowerHomeowner, empregado))) + 
+  geom_point( alpha = 0.01) +
+  ylim(quantile(pld_subset.verificado$BorrowerRate, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$BorrowerRate, 
+                probs=0.99, na.rm = TRUE)) +
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs=0.01, na.rm=TRUE),
+       quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs = 0.99, na.rm = TRUE)) + 
+  geom_smooth(aes(linetype = pago, 
+                  color = interaction(IsBorrowerHomeowner, empregado))) +
+  labs(color= "Casa Própria, Empregado")
 ```
 
 Paga menos o aposentado sem casa própria a partir de uma certa quantia. Difícil entender o motivo para isso, uma possibilidade é que não entra hipotécas e só crédito consignado para o aposentado sem casa. O banco acertou em todos os casos. Cobrando mais de quem se tornou mal pagador.
@@ -538,12 +797,19 @@ Também é interessante notar que para um Credit Score de 630 em média. Não h�
 
 ### Primeiro Gráfico
 ```{r echo=FALSE,  message=FALSE, warning=FALSE, Plot_One}
-pld_subset%>% group_by(pago,ListingCategory..numeric.) %>%
+pld_subset %>% 
+  group_by(pago, ListingCategory..numeric.) %>%
   tally %>%
   group_by(ListingCategory..numeric.) %>%
-    mutate(pct =round(100*n/sum(n),0)) %>% arrange(pago,desc(pct)) %>% 
-  ggplot(aes(x=ListingCategory..numeric., y = pct,color = pago,label=pct))+geom_bar(stat="identity", width = 0.85) + geom_text(position="stack",
-     aes(ymax=2),vjust=1) +ylab("porcentagem de bons ou maus pagadores na categoria (%)")+xlab("Motivos para o empréstimo")+labs(title = "Porcentagem de bons pagadores para cada motivo de empréstimo")
+  mutate(pct = round(100 * n / sum(n),0)) %>% 
+  arrange(pago, desc(pct)) %>% 
+  ggplot(aes(x = ListingCategory..numeric., 
+             y = pct, color = pago,label=pct)) + 
+  geom_bar(stat="identity", width = 0.85) + 
+  geom_text(position="stack", aes(ymax=2),vjust=1) + 
+  ylab("porcentagem de bons ou maus pagadores na categoria (%)") + 
+  xlab("Motivos para o empréstimo") + 
+  labs(title = "Porcentagem de bons pagadores para cada motivo de empréstimo")
 ```
 
 ### Descrição do Primeiro Gráfico
@@ -557,8 +823,18 @@ Esse gráfico demonstra a importância da motivação do cliente na hora de se c
 
 ### Segundo Gráfico
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Two}
-ggplot(pld_subset, aes(x=CreditScoreRangeLower,y=BorrowerAPR*100, color=pago, group= pago )) + geom_point(aes(shape=pago), alpha=0.05)+
-  xlim(quantile(pld_subset$CreditScoreRangeLower,probs=0.01,na.rm=TRUE),quantile(pld_subset$CreditScoreRangeLower,probs=0.99,na.rm=TRUE))+ geom_smooth()+ ylab("Taxa de Juros Anual (%)") + xlab("Credit Score") + labs(title = "Taxa de Juros Anual em Relação ao Credit Score Agrupado \n Entre Maus e Bons Pagadores") +
+ggplot(pld_subset, aes(x = CreditScoreRangeLower, y = BorrowerAPR*100, 
+                       color = pago, group = pago )) + 
+  geom_point(aes(shape = pago), alpha = 0.05)+
+  xlim(quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset$CreditScoreRangeLower, 
+                probs = 0.99, na.rm = TRUE)) + 
+  geom_smooth() + 
+  ylab("Taxa de Juros Anual (%)") + 
+  xlab("Credit Score") + 
+  labs(title = "Taxa de Juros Anual em Relação ao Credit Score Agrupado 
+       Entre Maus e Bons Pagadores") +
   theme(plot.title = element_text(hjust = 0.5))
 
 ```
@@ -573,8 +849,28 @@ Esse gráfico mostra a influência do Credit Score na Taxa de Juros Anual. O obj
 
 ### Terceiro Gráfico
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Three}
-ggplot(pld_subset.verificado, aes(x=StatedMonthlyIncome,y = (BorrowerRate*100), group=interaction(IsBorrowerHomeowner, empregado ), color = interaction(IsBorrowerHomeowner, empregado))) + geom_point( alpha=0.01)+ 
-  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.01,na.rm=TRUE),quantile(pld_subset.verificado$StatedMonthlyIncome,probs=0.99,na.rm=TRUE))+geom_smooth(aes(color = interaction(IsBorrowerHomeowner, empregado)))+ labs(color= "Casa Própria, Empregado")+ ylab("Taxa de Juros (%)") + xlab("Renda Mensal Verificada ($)")+labs(title="Taxa de Juros em Relação a Casa Própria, \n Status de Emprego e Renda Mensal")+
+ggplot(pld_subset.verificado, 
+       aes(x = StatedMonthlyIncome, y = (BorrowerRate*100),
+           group=interaction(IsBorrowerHomeowner, empregado ), 
+           color = interaction(IsBorrowerHomeowner, empregado))) + 
+  geom_point( alpha = 0.01) + 
+  xlim(quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs = 0.01, na.rm = TRUE),
+       quantile(pld_subset.verificado$StatedMonthlyIncome, 
+                probs = 0.99, na.rm = TRUE)) + 
+  geom_smooth() +
+  labs(color = "Casa Própria, Empregado", 
+title = "Taxa de Juros em Relação a Casa Própria, Status 
+de Emprego e Renda Mensal") + 
+  ylab("Taxa de Juros (%)") + 
+  xlab("Renda Mensal Verificada ($)") +
+  scale_color_manual(values = c("yellow", "black", "forestgreen","blue","red","purple"),
+                     labels = c("Aposentado Sem Casa Própria",
+                                "Aposentado com Casa Própria",
+                                "Desempregado Sem Casa Própria",
+                                "Desempregado Com Casa Própria",
+                                "Empregado Sem Casa Própria",
+                                "Empregado Com Casa Própria"))
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
