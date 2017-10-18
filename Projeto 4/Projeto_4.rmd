@@ -339,7 +339,7 @@ pld_subset$pago <- factor(pld_subset$pago)
 
 Agora, depois de ter criado uma variável que diz se a pessoa não está com problemas no pagamento. Irei analisar os parametros anteriores contra essa novo variável. 
 
-Essa variável é derivada da variável LoanStatus. Basicamente se o empréstimo já foi finalizado bem(Completed). Se está terminando(FinalPaymentInProgres), se por algum motivo foi cancelado(Cancelled) ou se está correndo sem problemas(Current) Ele é considerado um bom pagador. Caso contrário é um mal pagador.
+Essa variável é derivada da variável LoanStatus. Basicamente se o empréstimo já foi finalizado bem(Completed), se está terminando(FinalPaymentInProgres), se por algum motivo foi cancelado(Cancelled) ou se está correndo sem problemas(Current) Ele é considerado um bom pagador. Caso contrário é um mal pagador. Esses status são os que interpretei como os que indicam que não há problemas ainda ou que nunca teve no empréstimo.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, bivariate7}
 ggplot(pld_subset.verificado, aes(x = pago, y = StatedMonthlyIncome)) +
