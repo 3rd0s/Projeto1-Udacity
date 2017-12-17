@@ -1,0 +1,99 @@
+
+%\emph{}
+
+% -------------------------------------------------------------------------------------------------------------------------
+% TEX-UFC: Modelo de Trabalho Academico (tese de doutorado, dissertacao de
+% mestrado e trabalhos monograficos em geral) em conformidade com 
+% ABNT NBR 14724:2011: Informacao e documentacao - Trabalhos academicos - Apresentacao
+% -------------------------------------------------------------------------------------------------------------------------
+%% TEX-UFC, v-1.1
+%% Copyright 2013 
+%% Este modelo de Trabalho Academico foi elaborado pela seguinte equipe:
+%% Jose Fabio Bezerra Montenegro
+%% Eliene Maria Vieira de Moura
+%% Rocilda Maria Cavalcante Sales
+%% Margareth de Figueiredo Nogueira Mesquita
+%% Islania Castro
+%% Ana Cristina Ursulino Melo
+%% Isabela Nascimento
+%% Vanessa Rodrigues Pimenta
+%% Joao Fancisco da Silva Filho
+%% Leandro de Freitas Pessoa
+% ------------------------------------------------------------------------------------------------------------------------
+\documentclass[a4paper,12pt, oneside]{article}
+\usepackage{indentfirst}
+\usepackage[latin1]{inputenc}
+\usepackage{geometry}
+\usepackage{pstricks}
+\usepackage{graphicx,color}
+\usepackage[portuges]{babel}
+\usepackage[toc,page]{appendix}
+\usepackage{multirow,booktabs}%pacotes para tabelas
+\usepackage{amssymb, mathrsfs, amsfonts, amsmath}
+\usepackage{amsbsy, hyperref}
+\usepackage{latexsym}
+\usepackage{booktabs}
+\usepackage{yfonts}
+\usepackage{tikz}
+\usepackage{eurosym} %pacote para o simbolo do euro
+\usepackage[titles]{tocloft}
+\usepackage{newfloat}%%pacote para criar nova lista
+\usepackage[labelfont=rm,format=plain,indention=0cm,singlelinecheck=off,justification=raggedright,skip=2pt]{caption}
+\usepackage{chngcntr} %pacote para solucionar a falta de \subsubsubsection
+\usepackage{natbib} %pacote para o estilo bibliografico utilizado. \citet, 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%  INICIANDO O DOCUMENTO  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\av#1{\langle#1\rangle}
+\def\p#1{\left( #1\right) }
+\begin{document}					
+
+\section{Primeira Questão}
+
+	\subsection{Questão}
+	Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those?  [relevant rubric items: "data exploration", "outlier investigation"]
+	
+	\subsection{Resposta}
+	O objetivo desse projeto é criar um mecanismo capaz de prever quem é uma POI (Pessoa de interesse). Ou seja, quem é um possível suspeito Usando a informação financeira da empresa, salários, bônus dentre outras e os e-mails enviados e recebidos pelas pessoas da empresa. Com esses dados se torna viável alimentar um mecanismo de aprendizagem de máquina para que o computador consiga identificar os padrões intrínsecos do fenômeno.
+	
+	Infelizmente temos somente dados sobre 145 indivíduos, aonde 18 são POI, 127 normais. Foi retirado dos dados a entrada "TOTAL", que era um erro nos dados pois não representava nenhum indíviduo mas a soma de todos, e foi criado ou escalonado 9 features a partir de 10 selecionados do conjunto total. Infelizmente 7 desses 9 features tiveram mais de 50 resultados dos 145 faltando o que diminui a acurácia da análise. 
+
+\section{Segunda Questão}
+	\subsection{Questão}
+What features did you end up using in your POI identifier, and what selection process did you use to pick them? Did you have to do any scaling? Why or why not? As part of the assignment, you should attempt to engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it. (You do not necessarily have to use it in the final analysis, only engineer and test it.) In your feature selection step, if you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like SelectKBest, please report the feature scores and reasons for your choice of parameter values.  [relevant rubric items: "create new features", "intelligently select features", "properly scale features"]
+
+
+\subsection{Resposta}
+ Escolhi os features, considerando quais poderiam ter peso e sabendo que o PCA iria diminuir o erro de ter escolhido features pouco informativos. Logo escolhi: poi, frac\_salary, frac\_bonus, frac\_total\_payments, frac\_expenses, frac\_total\_stock\_value, frac\_from\_poi\_to\_this\_person, frac\_from\_this\_person\_to\_poi, 'frac\_shared\_receipt\_with\_poi e multiply\_emails. Os nomes frac só são indicativo de que houve alteração no feature original. Nos features econômicos foi feito e reescalonamento. Foi divido pelo maior valor todas as entradas. Já nos e-mail o reescalonamento foi feito dividindo pela feature to\_messages ou from\_messages conforme cada caso. 
+ 
+ Enquanto o multiply\_emails foi criado por mim e é a multiplicação dos atributos de e-mails enviados e recebidos por POI pois considerei que são atributos que poderiam ter comportamento multiplicativo, ou seja, se um for muito baixo cortaria efeito do outro. Infelizmente para o número de componentes escolhida no PCA Essa variável não apresenta efeito no resultado (apresentando acrescimento no resultado para um número maior de componentes)
+  
+ \section{Terceira Questão}
+	\subsection{Questão}
+	    What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?  [relevant rubric item: "pick an algorithm"]
+\subsection{Resposta}
+	Terminei utilizando o SVM, mas testei o naive bayes (antes de implementar o PCA) e a árvore de decisão foi amplamente testada (incluindo uso de PCA), ela chegava a cerca de 0.27 de precisão e recall mas nunca passou dos 0.3. Enquanto o SVM conseguiu  0.5 de precisão e recall.
+	
+ \section{Quarta Questão}
+\subsection{Questão}
+What does it mean to tune the parameters of an algorithm, and what can happen if you don't do this well?  How did you tune the parameters of your particular algorithm? What parameters did you tune? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier).  [relevant rubric items: "discuss parameter tuning", "tune the algorithm"]
+\subsection{Resposta}
+	Boa parte dos algoritmos de aprendizagem de máquina tem parâmetros que vão definir o seu comportamento e se não ajustados para o problema corretamente irão trazer parcos resultados. Inicialmente usei gridSearchCV
+	para afinar os parâmetros. mas não obtive bons resultados para a precisão e recall logo decidi fazer o ajuste manualmente. Os parâmetros que ajustei foram o parâmetro $C$ do SVM e o parâmetro $N_{components}$ do PCA. Com um pouco um pouco de tentativa e erro encontrei o parâmetro $N_{components}=4$ e $C=1$
+
+ \section{Quinta Questão}
+\subsection{Questão}
+What is validation, and what's a classic mistake you can make if you do it wrong? How did you validate your analysis?  [relevant rubric items: ?discuss validation?, ?validation strategy?]
+\subsection{Resposta}
+
+Validação é dizer se seu resultado é válido, aceitável, se ele é confiável. Nesse problema tivemos quase sempre uma acurácia relativamente alta, mas o recall e a precisão eram outra história. Logo se eu tivesse me baseado na acurácia somente teria um máquina incapaz de prever corretamente POIs. Validei meu algoritmo usando em especial a métrica F1 que é a média harmônica do recall e precisão, pois esses eram os valores importantes. F1 final foi de 0.5.
+Separei aleatoriamente 30\% da amostra para ser de teste e treinei o modelo nos outros 70\%
+\newpage 
+ \section{Sexta Questão}
+\subsection{Questão}
+    Give at least 2 evaluation metrics and your average performance for each of them.  Explain an interpretation of your metrics that says something human-understandable about your algorithm's performance. [relevant rubric item: "usage of evaluation metrics"]
+    \subsection{Resposta}
+    Medi a acurácia, precisão e o recall. Obtive respectivamente: 0.8605, 0.5 e 0.5. A acurácia me diz o quanto de acerto em suas previsões meu algoritmo consegue ter. Já a precisão diz o quão preciso é ele ao dizer que alguém e uma POI, ou seja qual a probabilidade dele não ter dado um falso positivo e por fim o recall indica qual a probabilidade dele não ter deixado de marcar alguém como POI.
+    
+    
+\end{document}
