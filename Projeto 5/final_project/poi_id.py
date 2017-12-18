@@ -110,13 +110,16 @@ clf=make_pipeline(PCA(n_components=4),SVC(kernel='rbf',C=40000,gamma='auto'))
 ### http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 
 # Example starting point. Try investigating other evaluation techniques!
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.metrics import precision_score, accuracy_score, recall_score
-features_train, features_test, labels_train, labels_test = \
-    train_test_split(features, labels, test_size=0.3, random_state=42)
+import numpy as np
+sss = StratifiedShuffleSplit(test_size = 0.3, random_state = 42)
+for train_index, test_index in sss.split(features,labels):
+    features_train, features_test = np.asarray(features)[train_index], np.asarray(features)[test_index]
+    labels_train, labels_test = np.asarray(labels)[train_index], np.asarray(labels)[test_index]
 
 clf.fit(features_train,labels_train)
-print precision_score(labels_test,clf.predict(features_test)), accuracy_score(labels_test,clf.predict(features_test)), recall_score(labels_test,clf.predict(features_test)),
+print  accuracy_score(labels_test,clf.predict(features_test)), precision_score(labels_test,clf.predict(features_test)), recall_score(labels_test,clf.predict(features_test)),
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
 ### that the version of poi_id.py that you submit can be run on its own and

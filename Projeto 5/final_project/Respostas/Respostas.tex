@@ -66,8 +66,8 @@ What features did you end up using in your POI identifier, and what selection pr
 \subsection{Resposta}
  Escolhi os features, considerando quais poderiam ter peso e sabendo que o PCA iria diminuir o erro de ter escolhido features pouco informativos. Logo escolhi: poi, frac\_salary, frac\_bonus, frac\_total\_payments, frac\_expenses, frac\_total\_stock\_value, frac\_from\_poi\_to\_this\_person, frac\_from\_this\_person\_to\_poi, 'frac\_shared\_receipt\_with\_poi e multiply\_emails. Os nomes frac só são indicativo de que houve alteração no feature original. Nos features econômicos foi feito e reescalonamento. Foi divido pelo maior valor todas as entradas. Já nos e-mail o reescalonamento foi feito dividindo pela feature to\_messages ou from\_messages conforme cada caso. 
  
- Enquanto o multiply\_emails foi criado por mim e é a multiplicação dos atributos de e-mails enviados e recebidos por POI pois considerei que são atributos que poderiam ter comportamento multiplicativo, ou seja, se um for muito baixo cortaria efeito do outro. Infelizmente para o número de componentes escolhida no PCA Essa variável não apresenta efeito no resultado (apresentando acrescimento no resultado para um número maior de componentes)
-  
+ Enquanto o multiply\_emails foi criado por mim e é a multiplicação dos atributos de e-mails enviados e recebidos por POI pois considerei que são atributos que poderiam ter comportamento multiplicativo, ou seja, se um for muito baixo cortaria efeito do outro. Infelizmente para o número de componentes escolhida no PCA (que foram 4) Essa variável não apresenta efeito no resultado. Esse teste foi realizado analisando-se o recall e a precisão obtida com e sem essa feature criada. O número de componentes do PCA foi escolhido através de todos os valores de 1 a 8(valor máximo) aonde ficou claro que o melhor resultado (métrica F1) seria para o número de componentes igual a 4
+   
  \section{Terceira Questão}
 	\subsection{Questão}
 	    What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?  [relevant rubric item: "pick an algorithm"]
@@ -79,14 +79,18 @@ What features did you end up using in your POI identifier, and what selection pr
 What does it mean to tune the parameters of an algorithm, and what can happen if you don't do this well?  How did you tune the parameters of your particular algorithm? What parameters did you tune? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier).  [relevant rubric items: "discuss parameter tuning", "tune the algorithm"]
 \subsection{Resposta}
 	Boa parte dos algoritmos de aprendizagem de máquina tem parâmetros que vão definir o seu comportamento e se não ajustados para o problema corretamente irão trazer parcos resultados. Inicialmente usei gridSearchCV
-	para afinar os parâmetros. mas não obtive bons resultados para a precisão e recall logo decidi fazer o ajuste manualmente. Os parâmetros que ajustei foram o parâmetro $C$ do SVM e o parâmetro $N_{components}$ do PCA. Com um pouco um pouco de tentativa e erro encontrei o parâmetro $N_{components}=4$ e $C=1$
+	para afinar os parâmetros. mas não obtive bons resultados para a precisão e recall logo decidi fazer o ajuste manualmente. Os parâmetros que ajustei foram o parâmetro $C$ do SVM e o parâmetro $N_{components}$ do PCA. Com um pouco um pouco de tentativa e erro encontrei o parâmetro $N_{components}=4$ e $C=40000$. 
+	
+	Foi testado kernel linear mas os resultados sempre foram pífios assim como $gama=[1:10]$ por tanto decidi convencionar usar gama auto que equivale a 0.125 no nosso caso que mostrou bons resultados o parâmetro mais medido foi o $C$ o qual testei vários valores como por exemplo: [1:10,100,1000,10000,20000,30000,40000,50000] E notei que a partir de 40000 os resultados pioravam conforme se aumentava.
 
  \section{Quinta Questão}
 \subsection{Questão}
 What is validation, and what's a classic mistake you can make if you do it wrong? How did you validate your analysis?  [relevant rubric items: ?discuss validation?, ?validation strategy?]
 \subsection{Resposta}
 
-Validação é dizer se seu resultado é válido, aceitável, se ele é confiável. Nesse problema tivemos quase sempre uma acurácia relativamente alta, mas o recall e a precisão eram outra história. Logo se eu tivesse me baseado na acurácia somente teria um máquina incapaz de prever corretamente POIs. Validei meu algoritmo usando em especial a métrica F1 que é a média harmônica do recall e precisão, pois esses eram os valores importantes. F1 final foi de 0.5.
+Validação é dizer se seu resultado é válido, aceitável. Um exemplo é se testarmos nossa máquina utilizando-se dos mesmos dados os quais treinamos ela, o resultado pareceria ser excelente porém ao se fazer previsões em outro conjunto de dados erraríamos muito mais que o esperado. Situação perigosa e indesejável. Nesse caso o aprendizado não foi validado corretamente.
+
+ Nesse problema tivemos quase sempre uma acurácia relativamente alta, mas o recall e a precisão eram outra história. Logo se eu tivesse me baseado na acurácia somente teria um máquina incapaz de prever corretamente POIs. Validei meu algoritmo usando em especial a métrica F1 que é a média harmônica do recall e precisão, pois esses eram os valores importantes. F1 final foi de 0.444444.
 Separei aleatoriamente 30\% da amostra para ser de teste e treinei o modelo nos outros 70\%
 \newpage 
  \section{Sexta Questão}
@@ -95,5 +99,8 @@ Separei aleatoriamente 30\% da amostra para ser de teste e treinei o modelo nos 
     \subsection{Resposta}
     Medi a acurácia, precisão e o recall. Obtive respectivamente: 0.8605, 0.5 e 0.5. A acurácia me diz o quanto de acerto em suas previsões meu algoritmo consegue ter. Já a precisão diz o quão preciso é ele ao dizer que alguém e uma POI, ou seja qual a probabilidade dele não ter dado um falso positivo e por fim o recall indica qual a probabilidade dele não ter deixado de marcar alguém como POI.
     
+    Ou seja com uma precisão baixa estamos identificando de forma incorreta e pode ser que tenhamos acusado alguém injustamente. Logo é na minha opinião a métrica mais importante. Porém alguém poderia argumentar que é o recall a mais importante. Pois com um recall baixo deixaremos possíveis suspeitos escapar. Logo para selecionar previamente pessoas a se investigar a fundo e ter a certeza de que se selecionou todos os culpados tem-se que se ter um alto recall.
+    
+    Como os resultados de precisão e recall foram ambos baixos não indicaria esse algoritmo para ser usado para encontrar novos POIs.
     
 \end{document}
