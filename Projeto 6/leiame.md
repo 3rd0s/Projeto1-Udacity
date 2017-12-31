@@ -18,7 +18,7 @@ Foi escolhido o gráfico de barras por mostrar bem a relação entre categorias 
 Foi alterado o tamanho dos títulos de cada eixo e dos labels dos ticks e colocado um título engajante para motivar o leitor do gráfico a lê-lo. As cores foram escolhidas de modo que destacasse bem as diferentes classes
 
 
-#Feedback
+# Feedback
 Foi notado no primeiro feedback que a dropline que aparecia quando passa o mouse por cima não funcionava direito quando o valor de y era negativo. Como não a considerei importante para a visualização a retirei do gráfico.
 
 
@@ -27,6 +27,6 @@ Já o segundo Feedback. Ele considerou que a desproporcionalidade dos ESFP fazia
 No último feedback foi proposto deixar os gráficos todos positivos. Como isso permitiria voltar com a animação resolvi aceitar a ideia e fiz mais um teste que acabei acatando como o final. Para a última visualização também modifiquei no tamanho das colunas e deixei o gráfico mais alinhado.
 
 
-#Recursos
+# Recursos
 
 Foram consultadas bastante as documentações oficiais do Dimple.js e do D3.js além site stackoverflow.com.
