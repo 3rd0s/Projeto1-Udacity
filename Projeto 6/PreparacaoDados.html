@@ -11785,7 +11785,7 @@ Judging (J) – Perceiving (P)
 </code></pre>
 <p>Se por exemplo uma pessoa tiver as características introversão, intuição, pensamento e percepção era será do tipo INTP. Esse sistema de tipologia foi criado com base no trabalho de Carl Jung, trabalho este que foi usado para vários sistemas de tipologia sendo o mais famoso o MBTI.</p>
 <p>O MBTI é alvo de diversas críticas sobre sua validade. Nesse trabalho espero notar se há realmente diferenças entre pessoas com base em seu resultado no MBTI contando a quantidade de palavras que a pessoa cita por sentença.</p>
-<p>Esse banco de dados contém 8600 linhas a quais cada linha representa um usuário do PersonalityCafe forum, a primeira coluna contém o tipo de personalidade MBTI da pessoa e a segunda os ultimos 50 posts desse usuário.</p>
+<p>Esse banco de dados contém 8600 linhas a quais cada linha representa um usuário do PersonalityCafe forum, a primeira coluna contém o tipo de personalidade MBTI da pessoa e a segunda os ultimos 50 posts desse usuário. O dataset pode ser encontrado no kaggle</p>
 
 </div>
 </div>
@@ -12074,7 +12074,7 @@ Judging (J) – Perceiving (P)
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x1462aab7b748&gt;</pre>
+<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x146c8e0aa358&gt;</pre>
 </div>
 
 </div>
@@ -12345,7 +12345,7 @@ LgAAAABJRU5ErkJggg==
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x1462aab7b860&gt;</pre>
+<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x146c8e0aa4a8&gt;</pre>
 </div>
 
 </div>
@@ -12586,7 +12586,7 @@ AAAYmFAIAAAwMKEQAABgYP8/4DJvepKFT/4AAAAASUVORK5CYII=
 <span class="s2">&quot;ISTJ&quot;</span><span class="p">:</span> <span class="s2">&quot;Sentinelas&quot;</span><span class="p">,</span><span class="s2">&quot;ISFJ&quot;</span><span class="p">:</span> <span class="s2">&quot;Sentinelas&quot;</span><span class="p">,</span> <span class="s2">&quot;ESTJ&quot;</span><span class="p">:</span> <span class="s2">&quot;Sentinelas&quot;</span><span class="p">,</span> <span class="s2">&quot;ESFJ&quot;</span><span class="p">:</span> <span class="s2">&quot;Sentinelas&quot;</span><span class="p">,</span>
 <span class="s2">&quot;ESFP&quot;</span><span class="p">:</span> <span class="s2">&quot;Exploradores&quot;</span><span class="p">,</span> <span class="s2">&quot;ISTP&quot;</span><span class="p">:</span> <span class="s2">&quot;Exploradores&quot;</span><span class="p">,</span> <span class="s2">&quot;ISFP&quot;</span><span class="p">:</span> <span class="s2">&quot;Exploradores&quot;</span><span class="p">,</span> <span class="s2">&quot;ESTP&quot;</span><span class="p">:</span> <span class="s2">&quot;Exploradores&quot;</span><span class="p">}</span>
 <span class="n">MediaPorTipo</span><span class="p">[</span><span class="s2">&quot;Classe&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">MediaPorTipo</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">DicionarioClasse</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">MediaPorTipo</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Tipo&#39;</span><span class="p">,</span> <span class="s1">&#39;num_words_per_post_normalized&#39;</span><span class="p">:</span> <span class="s1">&#39;Quantidade&#39;</span> <span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">MediaPorTipo</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Tipo&#39;</span><span class="p">,</span> <span class="s1">&#39;num_words_per_post_normalized&#39;</span><span class="p">:</span> <span class="s1">&#39;Quantidade&#39;</span><span class="p">,</span><span class="s1">&#39;num_words_per_post&#39;</span><span class="p">:</span><span class="s1">&#39;Quantidade de palavras&#39;</span> <span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>

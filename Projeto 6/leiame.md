@@ -9,7 +9,7 @@ O Myers Briggs Type Indicator(MBTI) é um sistema de tipologia de personalidade 
 
 Se por exemplo uma pessoa tiver as características introversão, intuição, pensamento e percepção era será do tipo INTP Também foi usado uma divisão por classes do site 16personalites a qual agrupa as personalidades em 4 classes. Os dados foram trabalhados utilizando-se de python e foi calculado o número médio de palavras por comentário, esse número foi normalizado para ficar centralizado em zero e em unidades de desvio padrão.
 
-O gráfico propõe notar padrões no quanto a pessoa fala por comentário e sua personalidade.
+O gráfico propõe notar padrões no quanto a pessoa fala por post no PersonalityCafe e sua personalidade. O DataSet foi baixado no Kaggle.
 
 # Design
 
