@@ -10,7 +10,7 @@
       visibility:hidden;
     }
     </style>
-    <script src="https://d3js.org/d3.v4.js"></script>
+  <script src="https://d3js.org/d3.v4.js"></script>
   <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
   <script type="text/javascript">
     var svg = dimple.newSvg("#chartContainer", 1024, 780);
@@ -18,9 +18,8 @@
       var myChart = new dimple.chart(svg, data);
       myChart.setBounds(60, 30, 800, 700)
       var x = myChart.addCategoryAxis("x", ["Tipo","Classe"]);
-      var y = myChart.addMeasureAxis("y", "Quantidade de palavras");
+      var y = myChart.addMeasureAxis("y", "Quantidade");
       //myChart.addColorAxis( "Classe",["blue","green","brown","purple"]);
-      y.overrideMin = +20;
       var mySeries = myChart.addSeries("Tipo de Personalidade", dimple.plot.bar);
       mySeries.stacked = true;
       x.addOrderRule(["ESFP","ISTP","ISFP","ESTP","INTJ","INTP","ENTJ","ENTP","ISTJ","ISFJ","ESTJ","ESFJ","INFJ","INFP","ENFJ","ENFP"]);
@@ -44,63 +43,74 @@
         .attr("y", 100)
         .attr("height", 100)
         .attr("width", 100);
-        var  g = legend.append("g")
-        g.append("rect")
-          .attr("x", 900)
-          .attr("y", 125)
-          .attr("width", 10)
-          .attr("height", 10)
-          .style("fill", "green");
-        g.append("text")
-              .attr("x", 920)
-              .attr("y", 135)
-              .attr("width", 10)
-              .attr("height", 10)
-              .text("Exploradores");
-        g.append("rect")
-          .attr("x", 900)
-          .attr("y", 145)
-          .attr("width", 10)
-          .attr("height", 10)
-          .style("fill", "blue");
-        g.append("text")
-              .attr("x", 920)
-              .attr("y", 155)
-              .attr("width", 10)
-              .attr("height", 10)
-              .text("Analistas");
-        g.append("rect")
-          .attr("x", 900)
-          .attr("y", 165)
-          .attr("width", 10)
-          .attr("height", 10)
-          .style("fill", "brown");
-        g.append("text")
-              .attr("x", 920)
-              .attr("y", 175)
-              .attr("width", 10)
-              .attr("height", 10)
-              .text("Sentinelas");
-        g.append("rect")
-          .attr("x", 900)
-          .attr("y", 185)
-          .attr("width", 10)
-          .attr("height", 10)
-          .style("fill", "purple");
-        g.append("text")
-              .attr("x", 920)
-              .attr("y", 195)
-              .attr("width", 10)
-              .attr("height", 10)
-              .text("Diplomatas");
+      var  g = legend.append("g");
+      g.append("rect")
+        .attr("x", 900)
+        .attr("y", 125)
+        .attr("width", 10)
+        .attr("height", 10)
+        .style("fill", "green");
+      g.append("text")
+        .attr("x", 920)
+        .attr("y", 135)
+        .attr("width", 10)
+        .attr("height", 10)
+        .text("Exploradores");
+      g.append("rect")
+        .attr("x", 900)
+        .attr("y", 145)
+        .attr("width", 10)
+        .attr("height", 10)
+        .style("fill", "blue");
+      g.append("text")
+        .attr("x", 920)
+        .attr("y", 155)
+        .attr("width", 10)
+        .attr("height", 10)
+        .text("Analistas");
+      g.append("rect")
+        .attr("x", 900)
+        .attr("y", 165)
+        .attr("width", 10)
+        .attr("height", 10)
+        .style("fill", "brown");
+      g.append("text")
+        .attr("x", 920)
+        .attr("y", 175)
+        .attr("width", 10)
+        .attr("height", 10)
+        .text("Sentinelas");
+      g.append("rect")
+        .attr("x", 900)
+        .attr("y", 185)
+        .attr("width", 10)
+        .attr("height", 10)
+        .style("fill", "purple");
+      g.append("text")
+        .attr("x", 920)
+        .attr("y", 195)
+        .attr("width", 10)
+        .attr("height", 10)
+        .text("Diplomatas");
       //TITULO DO GRAFICO
       myChart.svg.append("text")
-      .attr("x", 500)
-      .attr("y", 30)
-      .attr("text-anchor", "middle")
-      .style("font-size", "23px")
-      .text("Quanto Cada Personalidade Fala?");
-
+        .attr("x", 500)
+        .attr("y", 30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "23px")
+        .text("Quanto Cada Personalidade Fala?");
+      myChart.svg.append("text")
+        .attr("x", 485)
+        .attr("y", 45)
+        .attr("text-anchor", "middle")
+        .style("font-size", "10px")
+        .text("Tipos de personalidade segundo o MBTI, Cada 4 letras");
+        myChart.svg.append("text")
+          .attr("x", 485)
+          .attr("y", 60)
+          .attr("text-anchor", "middle")
+          .style("font-size", "10px")
+          .text("defini uma personalidade através de 4 dicôtomias");
     });
   </script>
 </div>
