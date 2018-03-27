@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html lang="en">
+<head>
+  <title>Quanto Cada Personalidade Fala?</title>
+    <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <style>
+    .tick line{
+      visibility:hidden;
+    }
+    .dimple-gridline line{
+      visibility:hidden;
+    }
+    div.tooltip {
+      position: absolute;
+      text-align: center;
+      width: 370px;
+      height: 60px;
+      padding: 2px;
+      font: 16px sans-serif;
+      background: lightsteelblue;
+      border: 0px;
+      border-radius: 8px;
+      pointer-events: none;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="chartContainer">
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+    <script type="text/javascript">
+      var svg = dimple.newSvg("#chartContainer", 1200, 850);
+      d3.csv("dados/DadosParaGrafico.csv", function (data) {
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(60, 30, 800, 700)
+        var x = myChart.addCategoryAxis("x", ["Tipo","Classe"]);
+        var y = myChart.addMeasureAxis("y", "Quantidade");
+        var mySeries = myChart.addSeries("Tipo de Personalidade", dimple.plot.bar);
+        mySeries.stacked = true;
+        x.addOrderRule(["ESFP","ISTP","ISFP","ESTP","INTJ","INTP","ENTJ","ENTP","ISTJ","ISFJ","ESTJ","ESFJ","INFJ","INFP","ENFJ","ENFP"]);
+        myChart.draw();
+        myChart.svg.selectAll(".dimple-analistas").style("fill", "blue").attr("data-legend","Analistas").attr("transform", "translate(-20,0)");;
+        myChart.svg.selectAll(".dimple-exploradores").style("fill", "green").attr("data-legend","Exploradores").attr("transform", "translate(-28,0)");
+        myChart.svg.selectAll(".dimple-sentinelas").style("fill", "brown").attr("data-legend","Sentinelas").attr("transform", "translate(-10,0)");
+        myChart.svg.selectAll(".dimple-diplomatas").style("fill", "purple").attr("data-legend","Diplomatas").attr("transform", "translate(0,0)");
+        myChart.svg.selectAll(".dimple-custom-axis-title").style("font-size", "17px");
+        myChart.svg.selectAll(".dimple-custom-axis-label").style("font-size", "13px");
+        myChart.svg.selectAll(".dimple-bar").attr("width",40);
+        myChart.svg.selectAll(".dimple-axis-x.dimple-title").attr("transform", "translate(0,13)");
+        myChart.svg.selectAll(".dimple-axis-y.dimple-title").attr("transform", "rotate(270, 15, 380)");
+        x.titleShape.text("Tipos De Personalidade");
+        y.titleShape.text("Quantidade Normalizada de Palavras por Post ");
+
+        //CROAÇÃO DA LEGENDA DE CLASSES
+        var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        var legend = svg.append("g")
+          .attr("class", "legend")
+          .attr("x", 900)
+          .attr("y", 100)
+          .attr("height", 100)
+          .attr("width", 100);
+        var  g = legend.append("g");
+        g.append("rect")
+          .attr("x", 900)
+          .attr("y", 125)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "green");
+        g.append("text")
+          .attr("x", 920)
+          .attr("y", 135)
+          .attr("width", 10)
+          .attr("height", 10)
+          .text("Exploradores")
+          .on("mouseover", function(d) {
+           div.transition()
+               .duration(200)
+               .style("opacity", .9);
+           div.text("Os explodares compõem o grupo de pessoas que gostam de viver experiencias novas de forma expontânea")
+               .style("left", (d3.event.pageX) + "px")
+               .style("top", (d3.event.pageY - 35) + "px");
+           })
+        .on("mouseout", function(d) {
+           div.transition()
+               .duration(500)
+               .style("opacity", 0);
+        });
+        g.append("rect")
+          .attr("x", 900)
+          .attr("y", 145)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "blue");
+        g.append("text")
+          .attr("x", 920)
+          .attr("y", 155)
+          .attr("width", 10)
+          .attr("height", 10)
+          .text("Analistas")
+          .on("mouseover", function(d) {
+           div.transition()
+               .duration(200)
+               .style("opacity", .9);
+           div.text("Esse tipo de personalidade abrange racionalidade e imparcialidade, sobressaindo-se em debates intelectuais.")
+               .style("left", (d3.event.pageX) + "px")
+               .style("top", (d3.event.pageY - 35) + "px");
+           })
+        .on("mouseout", function(d) {
+           div.transition()
+               .duration(500)
+               .style("opacity", 0);
+        });
+        g.append("rect")
+          .attr("x", 900)
+          .attr("y", 165)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "brown");
+        g.append("text")
+          .attr("x", 920)
+          .attr("y", 175)
+          .attr("width", 20)
+          .attr("height", 20)
+          .text("Sentinelas")
+          .on("mouseover", function(d) {
+           div.transition()
+               .duration(200)
+               .style("opacity", .9);
+           div.text("Os Sentinelas são colaborativos e altamente práticos, adotando e criando ordem, segurança e estabilidade por onde passam.")
+               .style("left", (d3.event.pageX) + "px")
+               .style("top", (d3.event.pageY - 35) + "px");
+           })
+        .on("mouseout", function(d) {
+           div.transition()
+               .duration(500)
+               .style("opacity", 0);
+        });
+        g.append("rect")
+          .attr("x", 900)
+          .attr("y", 185)
+          .attr("width", 10)
+          .attr("height", 10)
+          .attr("MouseTitle", "Os explodares compõem o grupo de pessoas que gostam de viver experiencias novas")
+          .style("fill", "purple");
+        g.append("text")
+          .attr("x", 920)
+          .attr("y", 195)
+          .attr("width", 10)
+          .attr("height", 10)
+          .text("Diplomatas")
+          .on("mouseover", function(d) {
+           div.transition()
+               .duration(200)
+               .style("opacity", .9);
+           div.text("Os Diplomatas focam na empatia e cooperação, se destacando na diplomacia e aconselhamento.")
+               .style("left", (d3.event.pageX) + "px")
+               .style("top", (d3.event.pageY - 35) + "px");
+           })
+        .on("mouseout", function(d) {
+           div.transition()
+               .duration(500)
+               .style("opacity", 0);
+        });
+        //TITULO DO GRAFICO
+        myChart.svg.append("text")
+          .attr("x", 500)
+          .attr("y", 30)
+          .attr("text-anchor", "middle")
+          .style("font-size", "23px")
+          .text("Quanto Cada Personalidade Fala?");
+        myChart.svg.append("text")
+          .attr("x", 485)
+          .attr("y", 45)
+          .attr("text-anchor", "middle")
+          .style("font-size", "10px")
+          .text("Tipos de personalidade segundo o MBTI, Cada 4 letras");
+          myChart.svg.append("text")
+            .attr("x", 485)
+            .attr("y", 60)
+            .attr("text-anchor", "middle")
+            .style("font-size", "10px")
+            .text("defini uma personalidade através de 4 dicôtomias");
+      });
+      </script>
+    </div>
+  </body>
+</html>
