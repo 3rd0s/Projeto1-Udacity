@@ -35,7 +35,6 @@
       myChart.setBounds(60, 30, 800, 700)
       var x = myChart.addCategoryAxis("x", ["Tipo","Classe"]);
       var y = myChart.addMeasureAxis("y", "Quantidade");
-      //myChart.addColorAxis( "Classe",["blue","green","brown","purple"]);
       var mySeries = myChart.addSeries("Tipo de Personalidade", dimple.plot.bar);
       mySeries.stacked = true;
       x.addOrderRule(["ESFP","ISTP","ISFP","ESTP","INTJ","INTP","ENTJ","ENTP","ISTJ","ISFJ","ESTJ","ESFJ","INFJ","INFP","ENFJ","ENFP"]);
